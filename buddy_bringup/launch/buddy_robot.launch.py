@@ -1,3 +1,5 @@
+import os
+from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -11,6 +13,7 @@ def generate_launch_description():
     use_camera = LaunchConfiguration("use_camera", default="false")
 
     moveit_config = MoveItConfigsBuilder("buddy_description", package_name="buddy_moveit2_config").to_moveit_configs()
+    buddy_bringup = os.path.join(get_package_share_directory('buddy_bringup'), 'config', 'moveit.rviz')
 
     launch_package_path = moveit_config.package_path
 
@@ -18,7 +21,7 @@ def generate_launch_description():
 
     ld.add_action(DeclareBooleanLaunchArg("db",default_value=False,description="By default, we do not start a database (it can be large)",))
     ld.add_action(DeclareBooleanLaunchArg("debug",default_value=False,description="By default, we are not in debug mode",))
-    ld.add_action(DeclareLaunchArgument("rviz_config",default_value=str(moveit_config.package_path / "config/moveit.rviz"),))
+    ld.add_action(DeclareLaunchArgument("rviz_config",default_value=str(buddy_bringup),))
     ld.add_action(DeclareLaunchArgument("use_camera",default_value="false",description="Whether to start the camera node",))
 
     # If there are virtual joints, broadcast static tf by including virtual_joints launch
