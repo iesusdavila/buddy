@@ -9,7 +9,9 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <exec_depend>buddy_bringup</exec_depend>
   <exec_depend>buddy_description</exec_depend>
+  <exec_depend>buddy_moveit2_config</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
