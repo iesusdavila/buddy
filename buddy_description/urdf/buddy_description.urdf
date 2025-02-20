@@ -42,12 +42,12 @@
   </joint>
 
   <link name="camera_link">
-    <collision>
+    <!-- <collision>
       <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
       <geometry>
         <box size="0.015 0.030 0.027"/>
       </geometry>
-    </collision>
+    </collision> -->
   </link>
 
   <link name="link_1">
