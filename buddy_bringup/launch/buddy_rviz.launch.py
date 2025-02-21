@@ -46,5 +46,11 @@ def generate_launch_description():
             executable='rviz2',
             name='rviz2',
             output='screen',
-            arguments=['-d', os.path.join(get_package_share_directory('buddy_description'), 'rviz', 'buddy.rviz')])
+            arguments=['-d', os.path.join(get_package_share_directory('buddy_description'), 'rviz', 'buddy.rviz')]),
+        Node(
+            package="usb_cam",
+            executable="usb_cam_node_exe",
+            name="usb_cam_node_exe",
+            output="screen",
+        )
     ])
