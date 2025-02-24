@@ -19,8 +19,7 @@ class ArmTrackerNode(Node):
         
         self.subscription = self.create_subscription(
             Image, 'image_raw', self.image_callback, 10)
-        self.publisher_right = self.create_publisher(HandPosition, 'right_arm_tracker', 10)
-        self.publisher_left = self.create_publisher(HandPosition, 'left_arm_tracker', 10)
+        self.publisher = self.create_publisher(HandPosition, 'arm_tracker', 10)
 
     def calculate_angle_with_vertical(self, p1, p2, plane="ZY"):
         if plane == "ZY":
@@ -82,34 +81,23 @@ class ArmTrackerNode(Node):
 
             angle_elbow_right_wrist_YX = -self.calculate_relative_angle(shoulder_right, elbow_right, wrist_right)
             angle_elbow_left_wrist_YX = -self.calculate_relative_angle(shoulder_left, elbow_left, wrist_left)
-
-            cv2.putText(frame, f"Ángulo ZY Hombro-Codo: {angle_shoulder_left_elbow_ZY:.2f}°",
-                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.putText(frame, f"Ángulo ZY Codo-Mano: {angle_elbow_left_wrist_ZY:.2f}°",
-                        (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.putText(frame, f"Ángulo YX Hombro-Codo: {angle_shoulder_left_elbow_YX:.2f}°",
-                        (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.putText(frame, f"Ángulo YX Codo-Mano: {angle_elbow_left_wrist_YX:.2f}°",
-                        (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
             
             mp.solutions.drawing_utils.draw_landmarks(
                 frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             cv2.imshow('MediaPipe Pose', frame)
 
-            hand_msg_right = HandPosition()
-            hand_msg_right.angle_shoulder_elbow_zy = 0.0 #float(angle_shoulder_elbow_ZY)
-            hand_msg_right.angle_elbow_wrist_zy = 0.0 #float(angle_elbow_wrist_ZY)
-            hand_msg_right.angle_shoulder_elbow_yx = float(angle_shoulder_right_elbow_YX)
-            hand_msg_right.angle_elbow_wrist_yx = float(angle_elbow_right_wrist_YX)
+            arm_msg = HandPosition()
+            arm_msg.angle_shoulder_right_elbow_zy = 0.0 #float(angle_shoulder_elbow_ZY)
+            arm_msg.angle_elbow_right_wrist_zy = 0.0 #float(angle_elbow_wrist_ZY)
+            arm_msg.angle_shoulder_right_elbow_yx = float(angle_shoulder_right_elbow_YX)
+            arm_msg.angle_elbow_right_wrist_yx = float(angle_elbow_right_wrist_YX)
 
-            hand_msg_left = HandPosition()
-            hand_msg_left.angle_shoulder_elbow_zy = 0.0
-            hand_msg_left.angle_elbow_wrist_zy = 0.0
-            hand_msg_left.angle_shoulder_elbow_yx = float(angle_shoulder_left_elbow_YX)
-            hand_msg_left.angle_elbow_wrist_yx = float(angle_elbow_left_wrist_YX)
+            arm_msg.angle_shoulder_left_elbow_zy = 0.0
+            arm_msg.angle_elbow_left_wrist_zy = 0.0
+            arm_msg.angle_shoulder_left_elbow_yx = float(angle_shoulder_left_elbow_YX)
+            arm_msg.angle_elbow_left_wrist_yx = float(angle_elbow_left_wrist_YX)
             
-            self.publisher_right.publish(hand_msg_right)
-            self.publisher_left.publish(hand_msg_left)
+            self.publisher.publish(arm_msg)
             
         if cv2.waitKey(1) & 0xFF == ord('q'):
             rclpy.shutdown()
