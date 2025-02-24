@@ -1,3 +1,4 @@
-float32 x
-float32 y
-float32 z
+float32 angle_shoulder_elbow_zy
+float32 angle_elbow_wrist_zy
+float32 angle_shoulder_elbow_yx
+float32 angle_elbow_wrist_yx
