@@ -6,7 +6,7 @@ find_package(ament_cmake_auto REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/HandPosition.msg"
+  "msg/BodyPosition.msg"
 )
 
 ament_auto_find_build_dependencies()

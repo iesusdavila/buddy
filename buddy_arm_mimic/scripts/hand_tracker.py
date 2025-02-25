@@ -7,7 +7,7 @@ from cv_bridge import CvBridge
 import cv2
 import mediapipe as mp
 import numpy as np
-from buddy_interfaces.msg import HandPosition
+from buddy_interfaces.msg import BodyPosition
 
 mp_pose = mp.solutions.pose
 

@@ -2,7 +2,7 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
-from buddy_interfaces.msg import HandPosition
+from buddy_interfaces.msg import BodyPosition
 import math
 
 class DualArmJointPublisher(Node):
