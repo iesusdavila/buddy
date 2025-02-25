@@ -5,7 +5,9 @@ project(buddy_interfaces)
 find_package(ament_cmake_auto REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
+# Combina todos los archivos de mensajes en una sola llamada
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/BodyPoints.msg"
   "msg/BodyPosition.msg"
 )
 
