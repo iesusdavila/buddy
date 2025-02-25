@@ -33,6 +33,16 @@ class ArmTrackerNode(Node):
         
         angle = np.arctan2(np.linalg.det([u, v]), np.dot(u, v))  # Mantiene signo
         return np.degrees(angle)
+    
+    def calculate_shoulder_tilt(self, left_shoulder, right_shoulder):
+        # Calcula el ángulo de inclinación entre hombros en el plano XY
+        dx = right_shoulder[0] - left_shoulder[0]  # Diferencia en X
+        dy = right_shoulder[1] - left_shoulder[1]  # Diferencia en Y
+        
+        # Ángulo entre la línea de hombros y la horizontal
+        angle = np.degrees(np.arctan2(dy, dx))
+        return angle
+
 
     def calculate_relative_angle(self, p1, p2, p3):
         v1 = np.array([p2[0] - p1[0], p2[1] - p1[1]])  # Vector hombro-codo
@@ -69,6 +79,9 @@ class ArmTrackerNode(Node):
             wrist_left = (landmarks[mp_pose.PoseLandmark.LEFT_WRIST].x,
                         landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y,
                         landmarks[mp_pose.PoseLandmark.LEFT_WRIST].z)
+            
+            # Calcular inclinación de hombros
+            shoulder_tilt = -self.calculate_shoulder_tilt(shoulder_left, shoulder_right)
 
             angle_shoulder_right_elbow_ZY = self.calculate_angle_with_vertical(shoulder_right, elbow_right, "ZY")
             angle_shoulder_left_elbow_ZY = self.calculate_angle_with_vertical(shoulder_left, elbow_left, "ZY")
@@ -87,6 +100,8 @@ class ArmTrackerNode(Node):
             cv2.imshow('MediaPipe Pose', frame)
 
             arm_msg = HandPosition()
+            arm_msg.shoulder_tilt_angle = float(shoulder_tilt)
+
             arm_msg.angle_shoulder_right_elbow_zy = 0.0 #float(angle_shoulder_elbow_ZY)
             arm_msg.angle_elbow_right_wrist_zy = 0.0 #float(angle_elbow_wrist_ZY)
             arm_msg.angle_shoulder_right_elbow_yx = float(angle_shoulder_right_elbow_YX)
