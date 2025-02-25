@@ -7,7 +7,7 @@ import math
 
 class DualArmJointPublisher(Node):
     def __init__(self):
-        super().__init__('dual_arm_joint_publisher')
+        super().__init__('body_joint_publisher')
         
         # Límites articulares para ambos brazos y torso
         self.joint_limits = {

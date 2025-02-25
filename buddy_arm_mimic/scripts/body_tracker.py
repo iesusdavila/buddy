@@ -13,13 +13,13 @@ mp_pose = mp.solutions.pose
 
 class ArmTrackerNode(Node):
     def __init__(self):
-        super().__init__('arm_tracker_node')
+        super().__init__('body_tracker_node')
         self.bridge = CvBridge()
         self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
         
         self.subscription = self.create_subscription(
             Image, 'image_raw', self.image_callback, 10)
-        self.publisher = self.create_publisher(BodyPosition, 'arm_tracker', 10)
+        self.publisher = self.create_publisher(BodyPosition, 'body_tracker', 10)
 
     def calculate_angle_with_vertical(self, p1, p2, plane="ZY"):
         if plane == "ZY":

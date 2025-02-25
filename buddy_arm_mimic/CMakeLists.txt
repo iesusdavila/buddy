@@ -34,7 +34,7 @@ find_package(control_msgs REQUIRED)
 
 # Instalar el script Python
 install(PROGRAMS
-  scripts/hand_tracker.py
+  scripts/body_tracker.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
