@@ -21,18 +21,14 @@ class ArmTrackerNode(Node):
             Image, 'image_raw', self.image_callback, 10)
         self.publisher = self.create_publisher(BodyPosition, 'body_tracker', 10)
 
-    def calculate_angle_with_vertical(self, p1, p2, plane="ZY"):
-        if plane == "ZY":
-            v = np.array([p2[1] - p1[1], p2[2] - p1[2]])  # (y, z)
-            u = np.array([1, 0])  # Vector vertical en Y
-        elif plane == "YX":
-            v = np.array([p2[0] - p1[0], p2[1] - p1[1]])  # (x, y)
-            u = np.array([0, 1])  # Vector vertical en Y
-        else:
-            raise ValueError("El plano debe ser 'ZY' o 'YX'.")
-        
-        angle = np.arctan2(np.linalg.det([u, v]), np.dot(u, v))  # Mantiene signo
-        return np.degrees(angle)
+    def calculate_angle_with_vertical(self, shoulder, elbow):
+        shoulder_x, shoulder_y = shoulder
+        elbow_x, elbow_y = elbow
+
+        v_x = elbow_x - shoulder_x  
+        v_y = elbow_y - shoulder_y 
+
+        return np.degrees(np.arctan2(-v_x, v_y))
     
     def calculate_shoulder_tilt(self, left_shoulder, right_shoulder):
         # Calcula el ángulo de inclinación entre hombros en el plano XY
@@ -44,12 +40,23 @@ class ArmTrackerNode(Node):
         return angle
 
 
-    def calculate_relative_angle(self, p1, p2, p3):
-        v1 = np.array([p2[0] - p1[0], p2[1] - p1[1]])  # Vector hombro-codo
-        v2 = np.array([p3[0] - p2[0], p3[1] - p2[1]])  # Vector codo-mano
-        
-        angle = np.arctan2(np.linalg.det([v1, v2]), np.dot(v1, v2))
-        return np.degrees(angle)
+    def calculate_relative_angle(self, shoulder, elbow, wrist):
+        # shoulder_right, elbow_right, wrist_right
+        shoulder_x, shoulder_y = shoulder
+        elbow_x, elbow_y = elbow
+        wrist_x, wrist_y = wrist
+
+        # Precalcular diferencias
+        v_x, v_y = wrist_x - elbow_x, wrist_y - elbow_x  # Codo → Muñeca
+        u_x, u_y = elbow_x - shoulder_x, elbow_y - shoulder_y  # Hombro → Codo
+
+        # Calcular producto escalar y determinante
+        det_v_u = u_x * v_y - u_y * v_x
+        dot_v_u = u_x * v_x + u_y * v_y
+
+        # Calcular ángulo con optimización
+        return np.degrees(np.arctan2(det_v_u, dot_v_u))
+
 
     def image_callback(self, msg):
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
@@ -83,14 +90,8 @@ class ArmTrackerNode(Node):
             # Calcular inclinación de hombros
             shoulder_tilt = -self.calculate_shoulder_tilt(shoulder_left, shoulder_right)
 
-            angle_shoulder_right_elbow_ZY = self.calculate_angle_with_vertical(shoulder_right, elbow_right, "ZY")
-            angle_shoulder_left_elbow_ZY = self.calculate_angle_with_vertical(shoulder_left, elbow_left, "ZY")
-
-            angle_elbow_right_wrist_ZY = self.calculate_angle_with_vertical(elbow_right, wrist_right, "ZY")
-            angle_elbow_left_wrist_ZY = self.calculate_angle_with_vertical(elbow_left, wrist_left, "ZY")
-
-            angle_shoulder_right_elbow_YX = self.calculate_angle_with_vertical(shoulder_right, elbow_right, "YX")
-            angle_shoulder_left_elbow_YX = -self.calculate_angle_with_vertical(shoulder_left, elbow_left, "YX")
+            angle_shoulder_right_elbow_YX = self.calculate_angle_with_vertical(shoulder_right, elbow_right)
+            angle_shoulder_left_elbow_YX = -self.calculate_angle_with_vertical(shoulder_left, elbow_left)
 
             angle_elbow_right_wrist_YX = -self.calculate_relative_angle(shoulder_right, elbow_right, wrist_right)
             angle_elbow_left_wrist_YX = -self.calculate_relative_angle(shoulder_left, elbow_left, wrist_left)
