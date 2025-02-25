@@ -36,7 +36,7 @@ class DualArmJointPublisher(Node):
         
         # Suscriptor único para ambos brazos
         self.subscription = self.create_subscription(
-            HandPosition,
+            BodyPosition,
             'arm_tracker',
             self.arm_tracker_callback,
             10

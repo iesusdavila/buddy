@@ -19,7 +19,7 @@ class ArmTrackerNode(Node):
         
         self.subscription = self.create_subscription(
             Image, 'image_raw', self.image_callback, 10)
-        self.publisher = self.create_publisher(HandPosition, 'arm_tracker', 10)
+        self.publisher = self.create_publisher(BodyPosition, 'arm_tracker', 10)
 
     def calculate_angle_with_vertical(self, p1, p2, plane="ZY"):
         if plane == "ZY":
@@ -99,7 +99,7 @@ class ArmTrackerNode(Node):
                 frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
             cv2.imshow('MediaPipe Pose', frame)
 
-            arm_msg = HandPosition()
+            arm_msg = BodyPosition()
             arm_msg.shoulder_tilt_angle = float(shoulder_tilt)
 
             arm_msg.angle_shoulder_right_elbow_zy = 0.0 #float(angle_shoulder_elbow_ZY)
