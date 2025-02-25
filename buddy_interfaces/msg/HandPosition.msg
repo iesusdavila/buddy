@@ -7,3 +7,5 @@ float32 angle_shoulder_left_elbow_zy
 float32 angle_elbow_left_wrist_zy
 float32 angle_shoulder_left_elbow_yx
 float32 angle_elbow_left_wrist_yx
+
+float32 shoulder_tilt_angle 
