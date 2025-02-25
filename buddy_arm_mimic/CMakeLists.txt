@@ -4,28 +4,26 @@ project(buddy_arm_mimic)
 # ========== Configuración para C++ ==========
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(moveit_ros_move_group REQUIRED) 
-find_package(moveit_ros_planning_interface REQUIRED)
-find_package(geometry_msgs REQUIRED)
 find_package(buddy_interfaces REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 # Configuración del ejecutable C++
-# add_executable(arm_controller src/arm_controller.cpp)
+add_executable(body_tracker_node src/body_tracker_node.cpp)
+ament_target_dependencies(body_tracker_node 
+  rclcpp 
+  sensor_msgs 
+  buddy_interfaces 
+  std_msgs
+)
 
-# # Dependencias para C++
-# ament_target_dependencies(arm_controller
-#   rclcpp
-#   moveit_core
-#   moveit_ros_planning_interface
-#   moveit_ros_move_group
-#   buddy_interfaces
-# )
-
-# target_link_libraries(arm_controller
-#   ${moveit_ros_planning_interface_LIBRARIES}
-#   ${moveit_ros_move_group_LIBRARIES}
-#   #moveit_move_group_interface::moveit_move_group_interface
-# )
+add_executable(buddy_controller src/buddy_controller.cpp)
+ament_target_dependencies(buddy_controller 
+  rclcpp 
+  sensor_msgs 
+  buddy_interfaces 
+  std_msgs
+)
 
 # ========== Configuración para Python ==========
 find_package(rclpy REQUIRED)
@@ -34,12 +32,7 @@ find_package(control_msgs REQUIRED)
 
 # Instalar el script Python
 install(PROGRAMS
-  scripts/body_tracker.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(PROGRAMS
-  scripts/robot_arm_controller.py
+  scripts/body_points_detector.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -50,19 +43,18 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}
 )
 
-# install(TARGETS arm_controller
-#   DESTINATION lib/${PROJECT_NAME}
-# )
+install(TARGETS 
+  buddy_controller
+  body_tracker_node
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_export_dependencies(
   rclcpp
   rclpy
-  moveit_core
-  moveit_ros_move_group
-  moveit_ros_planning_interface
   sensor_msgs
   buddy_interfaces
-  control_msgs
+  std_msgs
 )
 
 ament_package()
