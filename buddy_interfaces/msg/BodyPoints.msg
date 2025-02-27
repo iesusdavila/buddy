@@ -4,7 +4,6 @@ float32 right_elbow_x
 float32 right_elbow_y
 float32 right_wrist_x
 float32 right_wrist_y
-float32 right_wrist_z
 
 float32 left_shoulder_x
 float32 left_shoulder_y
@@ -12,4 +11,3 @@ float32 left_elbow_x
 float32 left_elbow_y
 float32 left_wrist_x
 float32 left_wrist_y
-float32 left_wrist_z

@@ -40,7 +40,6 @@ class BodyPointsDetectorNode(Node):
             
             points_msg.right_wrist_x = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].x
             points_msg.right_wrist_y = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].y
-            points_msg.right_wrist_z = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].z
             
             # Puntos del lado izquierdo
             points_msg.left_shoulder_x = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].x
@@ -51,7 +50,6 @@ class BodyPointsDetectorNode(Node):
             
             points_msg.left_wrist_x = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].x
             points_msg.left_wrist_y = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y
-            points_msg.left_wrist_z = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].z
             
             # Publicar los puntos
             self.publisher.publish(points_msg)

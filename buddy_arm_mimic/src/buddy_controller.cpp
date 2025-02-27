@@ -89,15 +89,13 @@ private:
         float upper = joint_limits_["joint_2"].second;
         float tilt_angle_radians = static_cast<float>(tilt_angle * M_PI / 180.0);
         torso_tilt_ = std::max(lower, std::min(upper, tilt_angle_radians));
-        
-        RCLCPP_INFO(this->get_logger(), "Angulo tilt del torso actualizado y su valor es: %f", torso_tilt_);
-        
+                
         // Procesar brazo derecho
         std::array<float, 4> right_angles = {
-            msg->angle_shoulder_right_elbow_zy,
-            msg->angle_shoulder_right_elbow_yx,
-            msg->angle_elbow_right_wrist_yx,
-            msg->angle_elbow_right_wrist_zy
+            msg->right_shoulder_elbow_zy,
+            msg->right_shoulder_elbow_yx,
+            msg->right_elbow_wrist_yx,
+            msg->right_elbow_wrist_zy
         };
         
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
@@ -105,10 +103,10 @@ private:
         
         // Procesar brazo izquierdo
         std::array<float, 4> left_angles = {
-            msg->angle_shoulder_left_elbow_zy,
-            msg->angle_shoulder_left_elbow_yx,
-            msg->angle_elbow_left_wrist_yx,
-            msg->angle_elbow_left_wrist_zy
+            msg->left_shoulder_elbow_zy,
+            msg->left_shoulder_elbow_yx,
+            msg->left_elbow_wrist_yx,
+            msg->left_elbow_wrist_zy
         };
         
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
