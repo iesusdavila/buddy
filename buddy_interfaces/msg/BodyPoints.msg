@@ -11,3 +11,5 @@ float32 left_elbow_x
 float32 left_elbow_y
 float32 left_wrist_x
 float32 left_wrist_y
+
+bool is_detected

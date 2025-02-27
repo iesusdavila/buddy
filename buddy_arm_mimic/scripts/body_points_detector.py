@@ -24,12 +24,15 @@ class BodyPointsDetectorNode(Node):
         frame = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.pose.process(image)
+
+        # Crear mensaje con los puntos detectados
+        points_msg = BodyPoints()
+        points_msg.is_detected = False
         
         if results.pose_landmarks:
             landmarks = results.pose_landmarks.landmark
 
-            # Crear mensaje con los puntos detectados
-            points_msg = BodyPoints()
+            points_msg.is_detected = True
             
             # Puntos del lado derecho
             points_msg.right_shoulder_x = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x

@@ -14,3 +14,5 @@ float32 left_wrist_x
 float32 left_wrist_y
 
 float32 shoulder_tilt_angle 
+
+bool is_valid

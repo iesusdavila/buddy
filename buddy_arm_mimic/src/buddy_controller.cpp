@@ -49,6 +49,9 @@ public:
     }
 
 private:
+    // Factor de suavizado (0.1 = 10% de cambio máximo por ciclo)
+    const float MAX_CHANGE_PER_STEP = 0.5;
+
     std::map<std::string, float> calculate_midpoints(const std::vector<std::string>& joints) {
         std::map<std::string, float> result;
         for (const auto& j : joints) {
@@ -58,7 +61,8 @@ private:
     }
     
     std::map<std::string, float> process_arm_data(const std::array<float, 4>& angles, 
-                                              const std::vector<std::string>& arm_joints) {
+                                              const std::vector<std::string>& arm_joints, 
+                                              const bool is_right) {
         std::map<std::string, float> positions;
         
         positions[arm_joints[0]] = angles[0] * M_PI / 180.0;  // shoulder_elbow_zy
@@ -72,18 +76,39 @@ private:
             float upper = joint_limits_[joint].second;
             positions[joint] = std::max(lower, std::min(upper, positions[joint]));
         }
+
+         // Limitar velocidad de cambio
+        for (const auto& joint : arm_joints) {
+            float target = positions[joint];
+            float current = is_right ? last_right_pos_[joint] : last_left_pos_[joint];
+            float delta = target - current;
+
+            // Aplicar límite de cambio máximo
+            if (std::abs(delta) > MAX_CHANGE_PER_STEP) {
+                delta = (delta > 0) ? MAX_CHANGE_PER_STEP : -MAX_CHANGE_PER_STEP;
+                target = current + delta;
+            }
+            
+            positions[joint] = target;
+        }
         
         return positions;
     }
     
     void arm_tracker_callback(const buddy_interfaces::msg::BodyPosition::SharedPtr msg) {
-        // Procesar inclinación del torso (joint_2)
-        float tilt_angle;
-        if (msg->shoulder_tilt_angle > 0) {
-            tilt_angle = msg->shoulder_tilt_angle - 180;
-        } else {
-            tilt_angle = msg->shoulder_tilt_angle + 180;
+        // Procesar solo si hay datos válidos
+        if (!msg->is_valid) {
+            RCLCPP_INFO(this->get_logger(), "Datos inválidos. Manteniendo posición.");
+            return;
         }
+
+        // Procesar inclinación del torso (joint_2)
+        float tilt_angle = msg->shoulder_tilt_angle > 0 ? msg->shoulder_tilt_angle - 180 : msg->shoulder_tilt_angle + 180;
+        // if (msg->shoulder_tilt_angle > 0) {
+        //     tilt_angle = msg->shoulder_tilt_angle - 180;
+        // } else {
+        //     tilt_angle = msg->shoulder_tilt_angle + 180;
+        // }
         
         float lower = joint_limits_["joint_2"].first;
         float upper = joint_limits_["joint_2"].second;
@@ -99,7 +124,7 @@ private:
         };
         
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
-        last_right_pos_ = process_arm_data(right_angles, right_joints);
+        last_right_pos_ = process_arm_data(right_angles, right_joints, true);
         
         // Procesar brazo izquierdo
         std::array<float, 4> left_angles = {
@@ -110,9 +135,8 @@ private:
         };
         
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
-        last_left_pos_ = process_arm_data(left_angles, left_joints);
+        last_left_pos_ = process_arm_data(left_angles, left_joints, false);
         
-        RCLCPP_DEBUG(this->get_logger(), "Datos actualizados para torso y ambos brazos");
     }
     
     void timer_callback() {

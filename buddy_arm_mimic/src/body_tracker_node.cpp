@@ -18,6 +18,14 @@ public:
     }
 
 private:
+    bool last_detection_valid = false;
+    buddy_interfaces::msg::BodyPosition last_valid_arm_msg;
+
+    // Función de suavizado (ejemplo: media móvil)
+    float smooth_angle(float new_angle, float prev_angle, float alpha = 0.2) {
+        return alpha * new_angle + (1 - alpha) * prev_angle;
+    }
+
     // Función para calcular el ángulo con la vertical
     float calculate_angle_with_vertical(float shoulder_x, float shoulder_y, float elbow_x, float elbow_y) {
         float v_x = elbow_x - shoulder_x;
@@ -57,6 +65,18 @@ private:
     
     void body_points_callback(const buddy_interfaces::msg::BodyPoints::SharedPtr msg) {
         buddy_interfaces::msg::BodyPosition arm_msg;
+        arm_msg.is_valid = false;
+
+        if (!msg->is_detected) {
+            if (last_detection_valid) {
+                // Publicar última posición válida con is_valid = false para indicar inactividad
+                last_valid_arm_msg.is_valid = false;
+                publisher_->publish(last_valid_arm_msg);
+                RCLCPP_WARN(this->get_logger(), "No detection! Using last valid angles but marking as invalid.");
+            }
+            last_detection_valid = false;
+            return;
+        }
         
         // Calcular inclinación de hombros
         float shoulder_tilt = -calculate_shoulder_tilt(
@@ -106,11 +126,27 @@ private:
         arm_msg.left_elbow_wrist_yx = angle_elbow_left_wrist_YX;
         arm_msg.left_wrist_x = msg->left_wrist_x;
         arm_msg.left_wrist_y = msg->left_wrist_y;
+
+        // Aplicar suavizado si la última detección fue válida
+        if (last_detection_valid) {
+            // arm_msg.shoulder_tilt_angle = smooth_angle(arm_msg.shoulder_tilt_angle, last_valid_arm_msg.shoulder_tilt_angle);
+            // Aplicar a todos los ángulos relevantes
+            arm_msg.right_shoulder_elbow_yx = smooth_angle(arm_msg.right_shoulder_elbow_yx, last_valid_arm_msg.right_shoulder_elbow_yx);
+            arm_msg.right_elbow_wrist_yx = smooth_angle(arm_msg.right_elbow_wrist_yx, last_valid_arm_msg.right_elbow_wrist_yx);
+            arm_msg.left_shoulder_elbow_yx = smooth_angle(arm_msg.left_shoulder_elbow_yx, last_valid_arm_msg.left_shoulder_elbow_yx);
+            arm_msg.left_elbow_wrist_yx = smooth_angle(arm_msg.left_elbow_wrist_yx, last_valid_arm_msg.left_elbow_wrist_yx);
+        }
+
+        // Guardar como última posición válida
+        last_valid_arm_msg = arm_msg;
+        last_detection_valid = true;
+        // Marcar como válido
+        arm_msg.is_valid = true;
         
         // Publicar el mensaje
         publisher_->publish(arm_msg);
         
-        RCLCPP_INFO(this->get_logger(), "Published body angles");
+        RCLCPP_INFO(this->get_logger(), "Sending body position message...");
     }
     
     rclcpp::Subscription<buddy_interfaces::msg::BodyPoints>::SharedPtr subscription_;
