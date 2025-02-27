@@ -25,6 +25,14 @@ ament_target_dependencies(buddy_controller
   std_msgs
 )
 
+add_executable(buddy_controller_v2 src/buddy_controller_v2.cpp)
+ament_target_dependencies(buddy_controller_v2 
+  rclcpp 
+  sensor_msgs 
+  buddy_interfaces 
+  std_msgs
+)
+
 # ========== Configuración para Python ==========
 find_package(rclpy REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -46,6 +54,7 @@ install(DIRECTORY
 install(TARGETS 
   buddy_controller
   body_tracker_node
+  buddy_controller_v2
   DESTINATION lib/${PROJECT_NAME}
 )
 

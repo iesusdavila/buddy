@@ -96,12 +96,16 @@ private:
         arm_msg.right_elbow_wrist_zy = 0.0;
         arm_msg.right_shoulder_elbow_yx = angle_shoulder_right_elbow_YX;
         arm_msg.right_elbow_wrist_yx = angle_elbow_right_wrist_YX;
+        arm_msg.right_wrist_x = msg->right_wrist_x;
+        arm_msg.right_wrist_y = msg->right_wrist_y;
         
         // Ángulos brazo izquierdo
         arm_msg.left_shoulder_elbow_zy = 0.0;  // Estos ángulos no se calculan actualmente
         arm_msg.left_elbow_wrist_zy = 0.0;
         arm_msg.left_shoulder_elbow_yx = angle_shoulder_left_elbow_YX;
         arm_msg.left_elbow_wrist_yx = angle_elbow_left_wrist_YX;
+        arm_msg.left_wrist_x = msg->left_wrist_x;
+        arm_msg.left_wrist_y = msg->left_wrist_y;
         
         // Publicar el mensaje
         publisher_->publish(arm_msg);
