@@ -4,11 +4,16 @@ project(buddy_interfaces)
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 # Combina todos los archivos de mensajes en una sola llamada
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/BodyPoints.msg"
   "msg/BodyPosition.msg"
+  "msg/FaceLandmarks.msg"
+  DEPENDENCIES geometry_msgs
+  DEPENDENCIES std_msgs
 )
 
 ament_auto_find_build_dependencies()
