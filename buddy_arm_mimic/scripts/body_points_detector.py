@@ -55,15 +55,7 @@ class BodyPointsDetectorNode(Node):
             points_msg.left_wrist_y = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y
             
             # Publicar los puntos
-            self.publisher.publish(points_msg)
-            
-            # Visualización (opcional)
-            mp.solutions.drawing_utils.draw_landmarks(
-                frame, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
-            cv2.imshow('MediaPipe Pose', frame)
-            
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            rclpy.shutdown()
+            self.publisher.publish(points_msg)        
 
 def main(args=None):
     rclpy.init(args=args)
