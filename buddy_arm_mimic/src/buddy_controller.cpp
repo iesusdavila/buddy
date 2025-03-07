@@ -9,37 +9,30 @@
 class DualArmJointPublisher : public rclcpp::Node {
 public:
     DualArmJointPublisher() : Node("body_joint_publisher") {
-        // Límites articulares para ambos brazos y torso
-        joint_limits_["joint_2"] = std::make_pair(-0.5235, 0.5235);  // Inclinación del torso
+        joint_limits_["joint_2"] = std::make_pair(-0.5235, 0.5235);  
         
-        // Brazo derecho
         joint_limits_["joint_5"] = std::make_pair(-0.7853, 1.5708);
         joint_limits_["joint_6"] = std::make_pair(0.0, 1.0472);
         joint_limits_["joint_7"] = std::make_pair(-0.7853, 0.7853);
         joint_limits_["joint_8"] = std::make_pair(0.1745, 1.5708);
         
-        // Brazo izquierdo
         joint_limits_["joint_9"] = std::make_pair(-0.7853, 1.5708);
         joint_limits_["joint_10"] = std::make_pair(0.0, 1.0472);
         joint_limits_["joint_11"] = std::make_pair(-0.7853, 0.7853);
         joint_limits_["joint_12"] = std::make_pair(0.1745, 1.5708);
         
-        // Posiciones iniciales (punto medio de los límites)
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
         
         last_right_pos_ = calculate_midpoints(right_joints);
         last_left_pos_ = calculate_midpoints(left_joints);
         
-        // Inicializar posición del torso en posición neutral (0)
         torso_tilt_ = 0.0;
         
-        // Suscriptor único para ambos brazos
         subscription_ = this->create_subscription<buddy_interfaces::msg::BodyPosition>(
             "body_tracker", 10, 
             std::bind(&DualArmJointPublisher::arm_tracker_callback, this, std::placeholders::_1));
         
-        // Publicador y temporizador
         publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(100), 
@@ -49,7 +42,6 @@ public:
     }
 
 private:
-    // Factor de suavizado (0.1 = 10% de cambio máximo por ciclo)
     const float MAX_CHANGE_PER_STEP = 0.5;
 
     std::map<std::string, float> calculate_midpoints(const std::vector<std::string>& joints) {
@@ -65,25 +57,22 @@ private:
                                               const bool is_right) {
         std::map<std::string, float> positions;
         
-        positions[arm_joints[0]] = angles[0] * M_PI / 180.0;  // shoulder_elbow_zy
-        positions[arm_joints[1]] = angles[1] * M_PI / 180.0;  // shoulder_elbow_yx
-        positions[arm_joints[2]] = angles[2] * M_PI / 180.0;  // elbow_wrist_yx
-        positions[arm_joints[3]] = angles[3] * M_PI / 180.0;  // elbow_wrist_zy
+        positions[arm_joints[0]] = angles[0] * M_PI / 180.0;  
+        positions[arm_joints[1]] = angles[1] * M_PI / 180.0;  
+        positions[arm_joints[2]] = angles[2] * M_PI / 180.0;  
+        positions[arm_joints[3]] = angles[3] * M_PI / 180.0;  
         
-        // Aplicar límites
         for (const auto& joint : arm_joints) {
             float lower = joint_limits_[joint].first;
             float upper = joint_limits_[joint].second;
             positions[joint] = std::max(lower, std::min(upper, positions[joint]));
         }
 
-         // Limitar velocidad de cambio
         for (const auto& joint : arm_joints) {
             float target = positions[joint];
             float current = is_right ? last_right_pos_[joint] : last_left_pos_[joint];
             float delta = target - current;
 
-            // Aplicar límite de cambio máximo
             if (std::abs(delta) > MAX_CHANGE_PER_STEP) {
                 delta = (delta > 0) ? MAX_CHANGE_PER_STEP : -MAX_CHANGE_PER_STEP;
                 target = current + delta;
@@ -96,26 +85,18 @@ private:
     }
     
     void arm_tracker_callback(const buddy_interfaces::msg::BodyPosition::SharedPtr msg) {
-        // Procesar solo si hay datos válidos
         if (!msg->is_valid) {
             RCLCPP_INFO(this->get_logger(), "Datos inválidos. Manteniendo posición.");
             return;
         }
 
-        // Procesar inclinación del torso (joint_2)
         float tilt_angle = msg->shoulder_tilt_angle > 0 ? msg->shoulder_tilt_angle - 180 : msg->shoulder_tilt_angle + 180;
-        // if (msg->shoulder_tilt_angle > 0) {
-        //     tilt_angle = msg->shoulder_tilt_angle - 180;
-        // } else {
-        //     tilt_angle = msg->shoulder_tilt_angle + 180;
-        // }
         
         float lower = joint_limits_["joint_2"].first;
         float upper = joint_limits_["joint_2"].second;
         float tilt_angle_radians = static_cast<float>(tilt_angle * M_PI / 180.0);
         torso_tilt_ = std::max(lower, std::min(upper, tilt_angle_radians));
                 
-        // Procesar brazo derecho
         std::array<float, 4> right_angles = {
             msg->right_shoulder_elbow_zy,
             msg->right_shoulder_elbow_yx,
@@ -126,7 +107,6 @@ private:
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
         last_right_pos_ = process_arm_data(right_angles, right_joints, true);
         
-        // Procesar brazo izquierdo
         std::array<float, 4> left_angles = {
             msg->left_shoulder_elbow_zy,
             msg->left_shoulder_elbow_yx,
@@ -143,34 +123,25 @@ private:
         auto joint_state = std::make_shared<sensor_msgs::msg::JointState>();
         joint_state->header.stamp = this->now();
         
-        // Nombres de las articulaciones
         for (int i = 1; i <= 12; i++) {
             joint_state->name.push_back("joint_" + std::to_string(i));
         }
         
-        // Construir arreglo de posiciones
         joint_state->position = {
-            // Joint 1 (no controlado)
             0.0,
-            // Joint 2 (torso tilt)
             torso_tilt_,
-            // Joints 3-4 (no controlados)
             0.0, 0.0,
-            // Brazo derecho (joints 5-8)
             last_right_pos_["joint_5"],
             last_right_pos_["joint_6"],
             last_right_pos_["joint_7"],
-            0.87265,  // last_right_pos_["joint_8"]*0 + 0.87265
-            // Brazo izquierdo (joints 9-12)
+            0.87265, 
             last_left_pos_["joint_9"],
             last_left_pos_["joint_10"],
             last_left_pos_["joint_11"],
-            0.87265   // last_left_pos_["joint_12"]*0 + 0.87265
         };
         
         publisher_->publish(*joint_state);
         
-        // Log con throttle (una vez por segundo)
         static rclcpp::Time last_log_time = this->now();
         if ((this->now() - last_log_time).seconds() >= 1.0) {
             RCLCPP_INFO(this->get_logger(), "Posiciones publicadas para torso y brazos");

@@ -25,7 +25,6 @@ class BodyPointsDetectorNode(Node):
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = self.pose.process(image)
 
-        # Crear mensaje con los puntos detectados
         points_msg = BodyPoints()
         points_msg.is_detected = False
         
@@ -34,7 +33,6 @@ class BodyPointsDetectorNode(Node):
 
             points_msg.is_detected = True
             
-            # Puntos del lado derecho
             points_msg.right_shoulder_x = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x
             points_msg.right_shoulder_y = landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].y
             
@@ -44,7 +42,6 @@ class BodyPointsDetectorNode(Node):
             points_msg.right_wrist_x = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].x
             points_msg.right_wrist_y = landmarks[mp_pose.PoseLandmark.RIGHT_WRIST].y
             
-            # Puntos del lado izquierdo
             points_msg.left_shoulder_x = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].x
             points_msg.left_shoulder_y = landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER].y
             
@@ -54,7 +51,6 @@ class BodyPointsDetectorNode(Node):
             points_msg.left_wrist_x = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].x
             points_msg.left_wrist_y = landmarks[mp_pose.PoseLandmark.LEFT_WRIST].y
             
-            # Publicar los puntos
             self.publisher.publish(points_msg)        
 
 def main(args=None):
