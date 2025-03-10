@@ -138,6 +138,7 @@ private:
             last_left_pos_["joint_9"],
             last_left_pos_["joint_10"],
             last_left_pos_["joint_11"],
+            0.87265
         };
         
         publisher_->publish(*joint_state);
