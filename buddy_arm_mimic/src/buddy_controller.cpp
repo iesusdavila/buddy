@@ -24,19 +24,19 @@ public:
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
         
-        last_right_pos_ = calculate_midpoints(right_joints);
-        last_left_pos_ = calculate_midpoints(left_joints);
+        last_right_pos_ = calculateMidpoints(right_joints);
+        last_left_pos_ = calculateMidpoints(left_joints);
         
         torso_tilt_ = 0.0;
         
         subscription_ = this->create_subscription<buddy_interfaces::msg::BodyPosition>(
             "body_tracker", 10, 
-            std::bind(&DualArmJointPublisher::arm_tracker_callback, this, std::placeholders::_1));
+            std::bind(&DualArmJointPublisher::armTrackerCallback, this, std::placeholders::_1));
         
         publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
         timer_ = this->create_wall_timer(
             std::chrono::milliseconds(100), 
-            std::bind(&DualArmJointPublisher::timer_callback, this));
+            std::bind(&DualArmJointPublisher::timerCallback, this));
         
         RCLCPP_INFO(this->get_logger(), "Dual arm joint publisher initialized");
     }
@@ -44,28 +44,36 @@ public:
 private:
     const float MAX_CHANGE_PER_STEP = 0.5;
 
-    std::map<std::string, float> calculate_midpoints(const std::vector<std::string>& joints) {
+    std::map<std::string, float> calculateMidpoints(const std::vector<std::string>& joints) {
         std::map<std::string, float> result;
         for (const auto& j : joints) {
             result[j] = (joint_limits_[j].first + joint_limits_[j].second) / 2.0;
         }
         return result;
     }
+
+    float euler2Radian(float radian) {
+        return radian * M_PI / 180.0;
+    }
+
+    float limitJointPosition(const std::string& joint, float position) {
+        float lower = joint_limits_[joint].first;
+        float upper = joint_limits_[joint].second;
+        return std::max(lower, std::min(upper, position));
+    }
     
-    std::map<std::string, float> process_arm_data(const std::array<float, 4>& angles, 
+    std::map<std::string, float> processArmData(const std::array<float, 4>& angles, 
                                               const std::vector<std::string>& arm_joints, 
                                               const bool is_right) {
         std::map<std::string, float> positions;
         
-        positions[arm_joints[0]] = angles[0] * M_PI / 180.0;  
-        positions[arm_joints[1]] = angles[1] * M_PI / 180.0;  
-        positions[arm_joints[2]] = angles[2] * M_PI / 180.0;  
-        positions[arm_joints[3]] = angles[3] * M_PI / 180.0;  
+        positions[arm_joints[0]] = euler2Radian(angles[0]);
+        positions[arm_joints[1]] = euler2Radian(angles[1]);
+        positions[arm_joints[2]] = euler2Radian(angles[2]); 
+        positions[arm_joints[3]] = euler2Radian(angles[3]);  
         
         for (const auto& joint : arm_joints) {
-            float lower = joint_limits_[joint].first;
-            float upper = joint_limits_[joint].second;
-            positions[joint] = std::max(lower, std::min(upper, positions[joint]));
+            positions[joint] = limitJointPosition(joint, positions[joint]);
         }
 
         for (const auto& joint : arm_joints) {
@@ -84,18 +92,16 @@ private:
         return positions;
     }
     
-    void arm_tracker_callback(const buddy_interfaces::msg::BodyPosition::SharedPtr msg) {
+    void armTrackerCallback(const buddy_interfaces::msg::BodyPosition::SharedPtr msg) {
         if (!msg->is_valid) {
             RCLCPP_INFO(this->get_logger(), "Datos inválidos. Manteniendo posición.");
             return;
         }
 
         float tilt_angle = msg->shoulder_tilt_angle > 0 ? msg->shoulder_tilt_angle - 180 : msg->shoulder_tilt_angle + 180;
-        
-        float lower = joint_limits_["joint_2"].first;
-        float upper = joint_limits_["joint_2"].second;
-        float tilt_angle_radians = static_cast<float>(tilt_angle * M_PI / 180.0);
-        torso_tilt_ = std::max(lower, std::min(upper, tilt_angle_radians));
+        tilt_angle = euler2Radian(tilt_angle);
+
+        torso_tilt_ = limitJointPosition("joint_2", tilt_angle);
                 
         std::array<float, 4> right_angles = {
             msg->right_shoulder_elbow_zy,
@@ -105,7 +111,7 @@ private:
         };
         
         std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
-        last_right_pos_ = process_arm_data(right_angles, right_joints, true);
+        last_right_pos_ = processArmData(right_angles, right_joints, true);
         
         std::array<float, 4> left_angles = {
             msg->left_shoulder_elbow_zy,
@@ -115,11 +121,11 @@ private:
         };
         
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
-        last_left_pos_ = process_arm_data(left_angles, left_joints, false);
+        last_left_pos_ = processArmData(left_angles, left_joints, false);
         
     }
     
-    void timer_callback() {
+    void timerCallback() {
         auto joint_state = std::make_shared<sensor_msgs::msg::JointState>();
         joint_state->header.stamp = this->now();
         
