@@ -42,7 +42,7 @@ public:
     }
 
 private:
-    const float MAX_CHANGE_PER_STEP = 0.5;
+    const float MAX_CHANGE_PER_STEP = 0.8;
 
     std::map<std::string, float> calculateMidpoints(const std::vector<std::string>& joints) {
         std::map<std::string, float> result;
