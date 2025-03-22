@@ -5,12 +5,11 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 class DualArmJointPublisher : public rclcpp::Node {
 public:
     DualArmJointPublisher() : Node("body_joint_publisher") {
-        joint_limits_["joint_2"] = std::make_pair(-0.5235, 0.5235);
+        joint_limits_["joint_2"] = std::make_pair(-0.5235, 0.5235);  
         
         joint_limits_["joint_5"] = std::make_pair(-0.7853, 1.5708);
         joint_limits_["joint_6"] = std::make_pair(0.0, 1.0472);
@@ -43,14 +42,7 @@ public:
     }
 
 private:
-    std::vector<float> interpolateCubic(float start, float end, size_t steps) {
-        std::vector<float> trajectory;
-        for (size_t i = 0; i <= steps; ++i) {
-            float t = static_cast<float>(i) / steps;
-            trajectory.push_back(start + t * (end - start));
-        }
-        return trajectory;
-    }
+    const float MAX_CHANGE_PER_STEP = 0.5;
 
     std::map<std::string, float> calculateMidpoints(const std::vector<std::string>& joints) {
         std::map<std::string, float> result;
@@ -60,8 +52,8 @@ private:
         return result;
     }
 
-    float euler2Radian(float degree) {
-        return degree * M_PI / 180.0;
+    float euler2Radian(float radian) {
+        return radian * M_PI / 180.0;
     }
 
     float limitJointPosition(const std::string& joint, float position) {
@@ -77,30 +69,26 @@ private:
         
         positions[arm_joints[0]] = euler2Radian(angles[0]);
         positions[arm_joints[1]] = euler2Radian(angles[1]);
-        positions[arm_joints[2]] = euler2Radian(angles[2]);
-        positions[arm_joints[3]] = euler2Radian(angles[3]);
+        positions[arm_joints[2]] = euler2Radian(angles[2]); 
+        positions[arm_joints[3]] = euler2Radian(angles[3]);  
         
         for (const auto& joint : arm_joints) {
             positions[joint] = limitJointPosition(joint, positions[joint]);
         }
 
-        if (is_right) {
-            right_arm_trajectory_.clear();
-            for (const auto& joint : arm_joints) {
-                float current = last_right_pos_[joint];
-                float target = positions[joint];
-                right_arm_trajectory_[joint] = interpolateCubic(current, target, INTERPOLATION_STEPS);
+        for (const auto& joint : arm_joints) {
+            float target = positions[joint];
+            float current = is_right ? last_right_pos_[joint] : last_left_pos_[joint];
+            float delta = target - current;
+
+            if (std::abs(delta) > MAX_CHANGE_PER_STEP) {
+                delta = (delta > 0) ? MAX_CHANGE_PER_STEP : -MAX_CHANGE_PER_STEP;
+                target = current + delta;
             }
-        } else {
-            left_arm_trajectory_.clear();
-            for (const auto& joint : arm_joints) {
-                float current = last_left_pos_[joint];
-                float target = positions[joint];
-                left_arm_trajectory_[joint] = interpolateCubic(current, target, INTERPOLATION_STEPS);
-            }
+            
+            positions[joint] = target;
         }
         
-        current_step_ = 0;
         return positions;
     }
     
@@ -134,19 +122,10 @@ private:
         
         std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
         last_left_pos_ = processArmData(left_angles, left_joints, false);
+        
     }
     
     void timerCallback() {
-        if (current_step_ < INTERPOLATION_STEPS) {
-            for (auto& [joint, trajectory] : right_arm_trajectory_) {
-                last_right_pos_[joint] = trajectory[current_step_];
-            }
-            for (auto& [joint, trajectory] : left_arm_trajectory_) {
-                last_left_pos_[joint] = trajectory[current_step_];
-            }
-            current_step_++;
-        }
-
         auto joint_state = std::make_shared<sensor_msgs::msg::JointState>();
         joint_state->header.stamp = this->now();
         
@@ -161,7 +140,7 @@ private:
             last_right_pos_["joint_5"],
             last_right_pos_["joint_6"],
             last_right_pos_["joint_7"],
-            0.87265,
+            0.87265, 
             last_left_pos_["joint_9"],
             last_left_pos_["joint_10"],
             last_left_pos_["joint_11"],
@@ -176,12 +155,7 @@ private:
             last_log_time = this->now();
         }
     }
-
-    std::map<std::string, std::vector<float>> right_arm_trajectory_;
-    std::map<std::string, std::vector<float>> left_arm_trajectory_;
-    size_t current_step_ = 0;
-    const size_t INTERPOLATION_STEPS = 10;
-
+    
     std::map<std::string, std::pair<float, float>> joint_limits_;
     std::map<std::string, float> last_right_pos_;
     std::map<std::string, float> last_left_pos_;
