@@ -54,11 +54,6 @@ private:
   void destroyFacePlane();
   void createTexture();
   void updateTexture(const sensor_msgs::msg::Image::ConstSharedPtr & msg);
-  // void updateTopic();
-  // void updateFrame();
-  // void updatePosition();
-  // void updateOrientation();
-  // void updateDimensions();
 
   Ogre::SceneNode * face_node_;
   Ogre::ManualObject * face_object_;
