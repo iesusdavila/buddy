@@ -148,7 +148,6 @@ void BuddyFaceDisplay::createTexture()
     material_->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
     material_->getTechnique(0)->getPass(0)->setDepthWriteEnabled(true);     
     
-    RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Texture created successfully");
   }
   catch (const Ogre::Exception& e) {
     RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), 
@@ -163,8 +162,6 @@ void BuddyFaceDisplay::createTexture()
 void BuddyFaceDisplay::createFacePlane()
 {
   if (!scene_manager_ || !face_node_) {
-    RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Recursos de Ogre no inicializados!");
-    
     if (!face_node_) {
       face_node_ = scene_node_->createChildSceneNode();
       face_node_->setPosition(position_);
@@ -245,7 +242,6 @@ void BuddyFaceDisplay::updateTopic()
       });
       
     setStatus(rviz_common::properties::StatusProperty::Ok, "Topic", QString::fromStdString(topic));
-    RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Subscribed to topic: %s", topic.c_str());
   } 
   catch (const rclcpp::exceptions::InvalidTopicNameError& e) {
     setStatus(rviz_common::properties::StatusProperty::Error, "Topic", 
@@ -265,19 +261,9 @@ void BuddyFaceDisplay::processMessage(const sensor_msgs::msg::Image::ConstShared
     std::lock_guard<std::mutex> lock(mutex_);
     
     if (!msg) {
-      RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Received null image message");
+      RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Received null image message");
       return;
     }
-    
-    if (msg->width > 4096 || msg->height > 4096) {
-      RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-        "Image dimensions too large: %dx%d", msg->width, msg->height);
-      return;
-    }
-    
-    RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-      "Received image: %dx%d, encoding: %s, step: %d", 
-      msg->width, msg->height, msg->encoding.c_str(), msg->step);
     
     current_image_ = msg;
     new_image_available_ = true;
@@ -290,40 +276,20 @@ void BuddyFaceDisplay::processMessage(const sensor_msgs::msg::Image::ConstShared
 
 void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPtr & msg)
 {
-  RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Updating texture with new image");
-
   if (!msg) {
-    RCLCPP_WARN(rclcpp::get_logger("buddy_face_display"), "Received null image message");
+    RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Received null image message");
     return;
   }
-
-  RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-    "Processing image: %dx%d, encoding: %s", 
-    msg->width, msg->height, msg->encoding.c_str());
 
   cv_bridge::CvImageConstPtr cv_ptr;
   cv::Mat bgra;
   
   try {
     if (msg->encoding == "yuv422_yuy2") {
-      RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-        "The image is in YUV422_YUY2 format. Converting to BGRA8 first");
 
       cv::Mat yuyv(msg->height, msg->width, CV_8UC2, const_cast<uint8_t*>(msg->data.data()));
-
       cv::Mat bgr;
       cv::cvtColor(yuyv, bgr, cv::COLOR_YUV2BGR_YUYV); 
-
-      if (bgr.empty()) {
-          RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Conversión YUV422 a BGR fallida!");
-          return;
-      }
-
-      if (bgr.channels() != 3) {
-          RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Canal BGR incorrecto: %d", bgr.channels());
-          return;
-      }
-
       cv_ptr = cv_bridge::CvImageConstPtr(new cv_bridge::CvImage(msg->header, "bgr8", bgr));
 
     } else {
@@ -372,9 +338,6 @@ void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedP
   if (texture_->getWidth() != static_cast<uint32_t>(cv_ptr->image.cols) || 
       texture_->getHeight() != static_cast<uint32_t>(cv_ptr->image.rows)) {
     
-    RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-      "Resizing texture to %dx%d", cv_ptr->image.cols, cv_ptr->image.rows);
-    
     texture_->unload();
     texture_->setWidth(cv_ptr->image.cols);
     texture_->setHeight(cv_ptr->image.rows);
@@ -387,19 +350,12 @@ void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedP
   uint8_t* dest = static_cast<uint8_t*>(pixelBox.data);
 
   Ogre::PixelFormat format = pixelBox.format;
-  RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-    "Texture format: %d, PF_B8G8R8A8=%d", 
-    static_cast<int>(format), static_cast<int>(Ogre::PF_B8G8R8A8));
 
   if (format == Ogre::PF_B8G8R8) { 
     
     size_t dest_pitch = pixelBox.rowPitch * 3;
     size_t src_pitch = cv_ptr->image.step;
     uint8_t* cv_data = cv_ptr->image.data;
-
-    RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), 
-      "Copying %dx%d image to texture. Format: %d", 
-      cv_ptr->image.cols, cv_ptr->image.rows, static_cast<int>(format));
 
     for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
       memcpy(dest, cv_data, src_pitch);
@@ -413,8 +369,6 @@ void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedP
   }
 
   pixelBuffer->unlock();
-  
-  RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Texture updated successfully");
 }
 
 void BuddyFaceDisplay::onEnable()
@@ -516,8 +470,6 @@ void BuddyFaceDisplay::updateDimensions()
 {
   width_ = width_property_->getFloat();
   height_ = height_property_->getFloat();
-
-  RCLCPP_INFO(rclcpp::get_logger("buddy_face_display"), "Updating dimensions: %.2f x %.2f", width_, height_);
 
   if (width_ <= 0.0f || height_ <= 0.0f) {
     RCLCPP_ERROR(rclcpp::get_logger("buddy_face_display"), "Dimensiones inválidas (<=0)");
