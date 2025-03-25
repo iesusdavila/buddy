@@ -52,8 +52,8 @@ private:
         return result;
     }
 
-    float euler2Radian(float radian) {
-        return radian * M_PI / 180.0;
+    float euler2Radian(float euler) {
+        return euler * M_PI / 180.0;
     }
 
     float limitJointPosition(const std::string& joint, float position) {
