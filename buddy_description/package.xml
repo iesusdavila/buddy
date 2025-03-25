@@ -3,7 +3,7 @@
 <package format="3">
   <name>buddy_description</name>
   <version>0.0.0</version>
-  <description>Paquete encargado de la descripcion de la estructura del robot para Rviz</description>
+  <description>Package responsible for describing the structure of the robot for Rviz</description>
   <maintainer email="iesusdavila@gmail.com">Iesus Davila</maintainer>
   <license>TODO: License declaration</license>
 
