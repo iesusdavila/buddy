@@ -1,0 +1,9 @@
+string input_text
+---
+# Result part
+string full_response
+bool completed
+---
+# Feedback part
+string current_chunk
+float32 progress
