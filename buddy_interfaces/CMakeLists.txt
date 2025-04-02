@@ -12,6 +12,9 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/BodyPoints.msg"
   "msg/BodyPosition.msg"
   "msg/FaceLandmarks.msg"
+  "msg/PersonResponse.msg"
+  "msg/LLMStatus.msg"
+  "action/ProcessResponse.action"
   DEPENDENCIES geometry_msgs
   DEPENDENCIES std_msgs
 )
