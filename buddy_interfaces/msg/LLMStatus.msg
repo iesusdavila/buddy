@@ -1,3 +1,0 @@
-bool is_processing
-string current_response
-builtin_interfaces/Time timestamp
