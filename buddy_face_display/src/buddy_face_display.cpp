@@ -27,7 +27,7 @@ BuddyFaceDisplay::BuddyFaceDisplay()
   height_(0.1)
 {
   topic_property_ = new rviz_common::properties::RosTopicProperty(
-    "Image Topic", "/image_raw",
+    "Image Topic", "/face_screen",
     "sensor_msgs/msg/Image",
     "Topic con la imagen para mostrar en la cara del robot",
     this, SLOT(updateTopic()));
