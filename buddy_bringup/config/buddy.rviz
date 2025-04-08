@@ -165,7 +165,7 @@ Visualization Manager:
     - Class: buddy_face_display/BuddyFaceDisplay
       Enabled: true
       Height: 0.05999999865889549
-      Image Topic: /image_raw
+      Image Topic: /face_screen
       Name: BuddyFaceDisplay
       Orientation (RPY):
         X: 0
