@@ -292,6 +292,10 @@ void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedP
       cv::cvtColor(yuyv, bgr, cv::COLOR_YUV2BGR_YUYV); 
       cv_ptr = cv_bridge::CvImageConstPtr(new cv_bridge::CvImage(msg->header, "bgr8", bgr));
 
+    } else if (msg->encoding == "bgr8") {
+      
+      cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
+
     } else {
       try {
         cv_ptr = cv_bridge::toCvShare(msg, "bgra8");
@@ -357,10 +361,19 @@ void BuddyFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedP
     size_t src_pitch = cv_ptr->image.step;
     uint8_t* cv_data = cv_ptr->image.data;
 
+    // for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
+    //   memcpy(dest, cv_data, src_pitch);
+    //   dest += dest_pitch;
+    //   cv_data += src_pitch;
+    // }
     for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
-      memcpy(dest, cv_data, src_pitch);
-      dest += dest_pitch;
-      cv_data += src_pitch;
+      for (size_t col = 0; col < static_cast<size_t>(cv_ptr->image.cols); col++) {
+        // Accede a los píxeles individualmente y asigna correctamente los canales
+        cv::Vec3b bgr = cv_ptr->image.at<cv::Vec3b>(row, col);
+        dest[(row * pixelBox.rowPitch + col) * 3 + 0] = bgr[2]; // B
+        dest[(row * pixelBox.rowPitch + col) * 3 + 1] = bgr[1]; // G
+        dest[(row * pixelBox.rowPitch + col) * 3 + 2] = bgr[0]; // R
+      }
     }
   } 
   else {
