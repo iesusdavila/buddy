@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>buddy_communication</name>
+  <version>0.1.0</version>
+  <description>Interfaz de hardware para controlar motores Dynamixel en el robot YAREN usando ROS2 Control.</description>
+  <maintainer email="iesusdavila@gmail.com">iesus_robot</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <depend>rclcpp</depend>
+  <depend>ros2_control</depend>
+  <depend>ros2_controllers</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>controller_interface</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>dynamixel_sdk</depend>
+  
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <hardware_interface plugin="${prefix}/buddy_hardware_plugin.xml"/>
+  </export>
+</package>
+
