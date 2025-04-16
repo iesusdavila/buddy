@@ -1,0 +1,5 @@
+<library path="buddy_hardware_interface">
+  <class name="buddy_hw_interface/BuddySystemPositionOnly"
+         type="buddy_hw_interface::BuddySystemPositionOnly"
+         base_class_type="hardware_interface::SystemInterface"/>
+</library>
