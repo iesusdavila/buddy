@@ -167,9 +167,6 @@ private:
     } else if (rad > limits.second) {
       rad = limits.second;
     }
-    double normalized = (rad - limits.first) / (limits.second - limits.first);
-    // return static_cast<int32_t>(normalized * 4095.0);
-    // return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);
     return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);
   }
 
