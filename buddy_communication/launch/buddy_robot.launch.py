@@ -2,9 +2,6 @@
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
 from launch_ros.substitutions import FindPackageShare
 import os
 from ament_index_python.packages import get_package_share_directory
@@ -40,7 +37,6 @@ def generate_launch_description():
                 controller_config_path
             ],
             output='screen',
-            # arguments=['--ros-args', '--log-level', 'debug']
         )
     
     spawner_joint_state = Node(
