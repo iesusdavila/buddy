@@ -32,44 +32,7 @@ joint_trajectory_controller:
     open_loop_control: false
 
     constraints:
-      goal_time: 5.0
-      stopped_velocity_tolerance: 0.01
-      
-      joint_1:
-        trajectory: 0.5
-        goal: 0.1
-      joint_2:
-        trajectory: 0.5
-        goal: 0.1
-      joint_3:
-        trajectory: 0.5
-        goal: 0.1
-      joint_4:
-        trajectory: 0.5
-        goal: 0.1
-      joint_5:
-        trajectory: 0.5
-        goal: 0.1
-      joint_6:
-        trajectory: 0.5
-        goal: 0.1
-      joint_7:
-        trajectory: 0.5
-        goal: 0.1
-      joint_8:
-        trajectory: 0.5
-        goal: 0.1
-      joint_9:  
-        trajectory: 0.5
-        goal: 0.1
-      joint_10:
-        trajectory: 0.5
-        goal: 0.1
-      joint_11:
-        trajectory: 0.5
-        goal: 0.1
-      joint_12:
-        trajectory: 0.5
-        goal: 0.1
+      goal_time: 3.0
+      stopped_velocity_tolerance: 0.05
     
     action_monitor_rate: 20.0
