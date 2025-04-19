@@ -82,6 +82,32 @@ public:
       joint_limits_[joint_names_[i]] = std::make_pair(min, max);
     }
 
+    // Activar el torque y configurar el PID para cada motor
+    for (size_t i = 0; i < joint_names_.size(); ++i)
+    {
+      int id = joint_id_map_[joint_names_[i]];
+      uint8_t dxl_error = 0;
+
+      int dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, 84, 100, &dxl_error);
+      if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"), "Error configurando parte P del PID en ID %d", id);
+      }
+
+      dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, 82, 0, &dxl_error);
+      if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"), "Error configurando parte I del PID en ID %d", id);
+      }
+
+      dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, 80, 50, &dxl_error);
+      if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"), "Error configurando parte D del PID en ID %d", id);
+      }
+
+      dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, 64, 1, &dxl_error);
+      if (dxl_comm_result != COMM_SUCCESS) {
+        RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"), "Error activando torque en ID %d", id);
+      }
+    }
     return CallbackReturn::SUCCESS;
   }
 
@@ -137,12 +163,7 @@ public:
       int32_t goal_position = convertRadiansToTicks(position_commands_[i], joint_names_[i]);
   
       uint8_t dxl_error = 0;
-      int dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, 64, 1, &dxl_error);
-      if (dxl_comm_result != COMM_SUCCESS) {
-        RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"), "Error activando torque en ID %d", id);
-      }
-
-      dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, 116, goal_position, &dxl_error);
+      int dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, 116, goal_position, &dxl_error);
   
       if (dxl_comm_result != COMM_SUCCESS) {
         RCLCPP_ERROR(rclcpp::get_logger("BuddySystemPositionOnly"),"Fallo al escribir en joint %s: Error de comunicación",joint_names_[i].c_str());
@@ -167,7 +188,7 @@ private:
     } else if (rad > limits.second) {
       rad = limits.second;
     }
-    return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);
+    return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);   
   }
 
   std::vector<std::string> joint_names_;
