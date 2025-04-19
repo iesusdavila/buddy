@@ -150,7 +150,7 @@ public:
       } else if (dxl_error != 0) {
         RCLCPP_INFO(rclcpp::get_logger("BuddySystemPositionOnly"), "Dynamixel error for joint %s: %d", joint_names_[i].c_str(), dxl_error);
       } else {
-        position_[i] = convertTicksToRadians(dxl_present_position);
+        position_[i] = convertTicksToRadians(dxl_present_position, joint_names_[i]);
       }
     }
     return return_type::OK;
@@ -175,9 +175,13 @@ public:
   }
 
 private:
-  double convertTicksToRadians(uint32_t tick)
+  double convertTicksToRadians(uint32_t tick, const std::string& joint_name)
   {
-    return (static_cast<double>(tick) - 2048.0) * (2.0 * M_PI / 4096.0);
+    if (joint_name == "joint_8" || joint_name == "joint_12") {
+      return (static_cast<double>(tick)) * (M_PI / 2048.0) - 1.75;
+    } else {
+      return (static_cast<double>(tick) - 2048.0) * (2.0 * M_PI / 4096.0);
+    }
   }
 
   int32_t convertRadiansToTicks(double rad, const std::string& joint_name)
@@ -188,7 +192,11 @@ private:
     } else if (rad > limits.second) {
       rad = limits.second;
     }
-    return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);   
+    if (joint_name == "joint_8" || joint_name == "joint_12") {
+      return static_cast<int>((rad + 1.75) * 2048.0 / M_PI);   
+    } else {
+      return static_cast<int32_t>(rad * 4096.0 / (2.0 * M_PI) + 2048.0);   
+    }
   }
 
   std::vector<std::string> joint_names_;
