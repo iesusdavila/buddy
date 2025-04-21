@@ -48,12 +48,6 @@
   </joint>
 
   <link name="camera_link">
-    <!-- <collision>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-      <geometry>
-        <box size="0.015 0.030 0.027"/>
-      </geometry>
-    </collision> -->
   </link>
 
   <link name="link_1">
@@ -679,126 +673,6 @@
       effort="300"
       velocity="3" />
   </joint>
-
-  <!-- <transmission name="Link_1_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_1">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_1_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_2_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_2">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_2_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 	
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_3_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_3">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_3_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_4_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_4">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_4_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_5_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_5">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_5_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_6_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_6">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_6_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_7_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_7">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_7_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>               
-  </transmission>
-
-  <transmission name="Link_8_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_8">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_8_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_9_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_9">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_9_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_10_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_10">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_10_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_11_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_11">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_11_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
-  <transmission name="Link_12_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="joint_12">
-    <hardwareInterface>	hardware_interface/PositionJointInterface</hardwareInterface></joint>
-    <actuator name="Link_12_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface> 		
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission> -->
 
   <ros2_control name="BuddySystemPositionOnly" type="system">
     <hardware>
