@@ -80,7 +80,7 @@ private:
             msg->right_elbow_x, msg->right_elbow_y
         );
         
-        float angle_elbow_right_wrist_YX = -calculateRelativeAngle(
+        float angle_elbow_right_wrist_YX = calculateRelativeAngle(
             msg->right_shoulder_x, msg->right_shoulder_y,
             msg->right_elbow_x, msg->right_elbow_y,
             msg->right_wrist_x, msg->right_wrist_y
@@ -91,7 +91,7 @@ private:
             msg->left_elbow_x, msg->left_elbow_y
         );
         
-        float angle_elbow_left_wrist_YX = -calculateRelativeAngle(
+        float angle_elbow_left_wrist_YX = calculateRelativeAngle(
             msg->left_shoulder_x, msg->left_shoulder_y,
             msg->left_elbow_x, msg->left_elbow_y,
             msg->left_wrist_x, msg->left_wrist_y

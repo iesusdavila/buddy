@@ -4,9 +4,11 @@ project(coco_arm_mimic)
 # ========== Configuración para C++ ==========
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(coco_interfaces REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(control_msgs REQUIRED)
 
 # Configuración del ejecutable C++
 add_executable(body_tracker_node src/body_tracker_node.cpp)
@@ -20,6 +22,8 @@ ament_target_dependencies(body_tracker_node
 add_executable(coco_controller src/coco_controller.cpp)
 ament_target_dependencies(coco_controller 
   rclcpp 
+  rclcpp_action
+  control_msgs
   sensor_msgs 
   coco_interfaces 
   std_msgs
@@ -28,6 +32,8 @@ ament_target_dependencies(coco_controller
 add_executable(coco_controller_v2 src/coco_controller_v2.cpp)
 ament_target_dependencies(coco_controller_v2 
   rclcpp 
+  rclcpp_action
+  control_msgs
   sensor_msgs 
   coco_interfaces 
   std_msgs
@@ -61,6 +67,8 @@ install(TARGETS
 ament_export_dependencies(
   rclcpp
   rclpy
+  rclcpp_action
+  control_msgs
   sensor_msgs
   coco_interfaces
   std_msgs
