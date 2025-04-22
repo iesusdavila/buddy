@@ -1,0 +1,5 @@
+<library path="coco_hardware_interface">
+  <class name="coco_hw_interface/CocoSystemPositionOnly"
+         type="coco_hw_interface::CocoSystemPositionOnly"
+         base_class_type="hardware_interface::SystemInterface"/>
+</library>

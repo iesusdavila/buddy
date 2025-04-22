@@ -1,0 +1,12 @@
+<library path="coco_face_display">
+  <class 
+    name="coco_face_display/CocoFaceDisplay" 
+    type="coco_face_display::CocoFaceDisplay" 
+    base_class_type="rviz_common::Display"
+  >
+    <description>
+      Displays images on a specified location of a robot model, typically used for robot face/expression visualization.
+    </description>
+    <message_type>sensor_msgs/msg/Image</message_type>
+  </class>
+</library>
