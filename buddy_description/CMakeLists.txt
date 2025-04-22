@@ -10,6 +10,11 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+find_package(ament_cmake REQUIRED)
+find_package(urdf REQUIRED)
+
+ament_environment_hooks("hooks/resource_paths.dsv.in")
+
 install(
   DIRECTORY meshes urdf
   DESTINATION share/${PROJECT_NAME}
