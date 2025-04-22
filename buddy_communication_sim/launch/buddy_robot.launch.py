@@ -17,14 +17,6 @@ def generate_launch_description():
     gz_args = LaunchConfiguration('gz_args', default='')
 
     pkg_share = FindPackageShare('buddy_communication_sim').find('buddy_communication_sim')
-    # urdf_file_name = 'buddy_description_sim.urdf'  # Archivo URDF para simulación
-
-    # urdf_path = os.path.join(
-    #     get_package_share_directory('buddy_description'),
-    #     'urdf',
-    #     urdf_file_name)
-    # with open(urdf_path, "r") as infp:
-    #     robot_description_content = infp.read()
 
     robot_description_content = Command(
         [
