@@ -3,12 +3,12 @@
     <xacro:arg name="initial_positions_file" default="initial_positions.yaml" />
 
     <!-- Import coco_description urdf file -->
-    <xacro:include filename="$(find coco_description)/urdf/coco_description.urdf" />
+    <xacro:include filename="$(find coco_description)/urdf/coco_description_moveit.urdf" />
 
     <!-- Import control_xacro -->
-    <xacro:include filename="coco_description.ros2_control.xacro" />
+    <xacro:include filename="coco_description_moveit.ros2_control.xacro" />
 
 
-    <xacro:coco_description_ros2_control name="FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
+    <xacro:coco_description_moveit_ros2_control name="FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
 
 </robot>

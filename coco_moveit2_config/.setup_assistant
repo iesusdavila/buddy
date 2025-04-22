@@ -1,9 +1,9 @@
 moveit_setup_assistant_config:
   urdf:
     package: coco_description
-    relative_path: urdf/coco_description.urdf
+    relative_path: urdf/coco_description_moveit.urdf
   srdf:
-    relative_path: config/coco_description.srdf
+    relative_path: config/coco_description_moveit.srdf
   package_settings:
     author_name: Iesus Davila
     author_email: iesusdavila@gmail.com
