@@ -37,49 +37,6 @@ def generate_launch_description():
         ]
     )
     controller_config_path = os.path.join(pkg_share, 'config', 'buddy_controllers.yaml')
-    robot_controllers = PathJoinSubstitution(
-        [
-            FindPackageShare('buddy_communication_sim'),
-            'config',
-            'buddy_controllers.yaml',
-        ]
-    )
-
-    # rsp = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     output='screen',
-    #     parameters=[
-    #         {'robot_description': robot_description_content}, 
-    #         {'use_sim_time': True}
-    #     ])
-
-    # ros2_control_node = Node(
-    #         package='controller_manager',
-    #         executable='ros2_control_node',
-    #         parameters=[
-    #             controller_config_path,
-    #             {'use_sim_time': True},
-    #         ],
-    #         output='screen',
-    #         remappings=[
-    #             ("~/robot_description", "/robot_description"),
-    #         ],
-    #     )
-
-    # spawner_joint_state = Node(
-    #         package="controller_manager",
-    #         executable="spawner",
-    #         arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-    #         output="screen",
-    #     )
-    
-    # spawner = Node(
-    #         package="controller_manager",
-    #         executable="spawner",
-    #         arguments=["joint_trajectory_controller", "--controller-manager", "/controller_manager"],
-    #         output="screen",
-    #     )
 
     node_robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -94,7 +51,6 @@ def generate_launch_description():
         output='screen',
         arguments=['-topic', 'robot_description',
                    '-name', 'buddy',
-                    '-x', '0.0', '-y', '0.0', '-z', '0.0',
                     '-allow_renaming', 'true']
     )
 
