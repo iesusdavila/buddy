@@ -16,7 +16,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default=True)
     gz_args = LaunchConfiguration('gz_args', default='')
 
-    pkg_share = FindPackageShare('coco_communication_sim').find('coco_communication_sim')
+    pkg_share = FindPackageShare('coco_gazebo_sim').find('coco_gazebo_sim')
 
     robot_description_content = Command(
         [
