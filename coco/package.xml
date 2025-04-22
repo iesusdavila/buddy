@@ -12,6 +12,7 @@
   <exec_depend>coco_arm_mimic</exec_depend>
   <exec_depend>coco_bringup</exec_depend>
   <exec_depend>coco_description</exec_depend>
+  <exec_depend>coco_communication</exec_depend>
   <exec_depend>coco_face_display</exec_depend>
   <exec_depend>coco_interfaces</exec_depend>
   <exec_depend>coco_moveit2_config</exec_depend>
