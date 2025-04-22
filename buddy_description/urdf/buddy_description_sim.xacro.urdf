@@ -679,7 +679,6 @@
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
-      <!-- <plugin>buddy_hw_interface/BuddySystemSimulation</plugin>  -->
     </hardware>
 
     <!-- Transmisiones para cada articulación -->
@@ -784,19 +783,6 @@
       <param name="max">1.5708</param>
     </joint>
   </ros2_control>
-
-  <!-- <gazebo>
-     <plugin name="control" filename="libgazebo_ros_control.so">
-       <robotNamespace>/</robotNamespace>
-     </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo>
-    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
-      <parameters>$(find buddy_communication_sim)/config/buddy_controllers.yaml</parameters>
-      <robot_namespace>/</robot_namespace>
-    </plugin>
-  </gazebo> -->
 
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">

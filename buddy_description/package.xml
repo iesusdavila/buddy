@@ -14,6 +14,5 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <!-- <gazebo_ros gazebo_model_path = "/home/iesus_robot/ros2_ws/src/buddy_description/share/" /> -->
   </export>
 </package>
