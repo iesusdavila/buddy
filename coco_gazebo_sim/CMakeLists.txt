@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(coco_communication_sim)
+project(coco_gazebo_sim)
 
 # Default to C++17
 set(CMAKE_CXX_STANDARD 17)

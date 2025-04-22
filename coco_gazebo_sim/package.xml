@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>coco_communication_sim</name>
+  <name>coco_gazebo_sim</name>
   <version>0.1.0</version>
   <description>Interfaz de hardware para controlar motores Dynamixel en el robot YAREN usando ROS2 Control.</description>
   <maintainer email="iesusdavila@gmail.com">iesus_robot</maintainer>
