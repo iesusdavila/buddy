@@ -1,0 +1,5 @@
+<library path="buddy_hardware_interface_sim">
+  <class name="buddy_hw_interface/BuddySystemSimulation"
+         type="buddy_hw_interface::BuddySystemSimulation"
+         base_class_type="hardware_interface::SystemInterface"/>
+</library>
