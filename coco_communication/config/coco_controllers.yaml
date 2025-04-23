@@ -11,6 +11,9 @@ controller_manager:
 
 joint_trajectory_controller:
   ros__parameters:
+
+    state_publish_rate: 50.0
+
     joints:
       - joint_1
       - joint_2
@@ -35,4 +38,4 @@ joint_trajectory_controller:
       goal_time: 3.0
       stopped_velocity_tolerance: 0.05
     
-    action_monitor_rate: 20.0
+    action_monitor_rate: 50.0
