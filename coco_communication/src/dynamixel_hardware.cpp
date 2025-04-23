@@ -157,20 +157,16 @@ public:
   }
 
   return_type write(const rclcpp::Time &, const rclcpp::Duration &) override {
+    dynamixel::GroupSyncWrite sync_write(portHandler_, packetHandler_, 116, 4); // 116 = Goal Position
+
     for (size_t i = 0; i < joint_names_.size(); ++i) 
     {
-      int id = joint_id_map_[joint_names_[i]];
-      int32_t goal_position = convertRadiansToTicks(position_commands_[i], joint_names_[i]);
-  
-      uint8_t dxl_error = 0;
-      int dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, 116, goal_position, &dxl_error);
-  
-      if (dxl_comm_result != COMM_SUCCESS) {
-        RCLCPP_ERROR(rclcpp::get_logger("CocoSystemPositionOnly"),"Fallo al escribir en joint %s: Error de comunicación",joint_names_[i].c_str());
-      } else if (dxl_error != 0) {
-        RCLCPP_ERROR(rclcpp::get_logger("CocoSystemPositionOnly"),"Error del Dynamixel (ID %d): %s",id, packetHandler_->getRxPacketError(dxl_error));
-      }
+      int32_t goal = convertRadiansToTicks(position_commands_[i], joint_names_[i]);
+      sync_write.addParam(joint_id_map_[joint_names_[i]], (uint8_t*)&goal);
     }
+    sync_write.txPacket();
+    sync_write.clearParam();
+
     return return_type::OK;
   }
 
