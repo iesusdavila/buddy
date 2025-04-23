@@ -29,16 +29,6 @@ ament_target_dependencies(coco_controller
   std_msgs
 )
 
-add_executable(coco_controller_v2 src/coco_controller_v2.cpp)
-ament_target_dependencies(coco_controller_v2 
-  rclcpp 
-  rclcpp_action
-  control_msgs
-  sensor_msgs 
-  coco_interfaces 
-  std_msgs
-)
-
 # ========== Configuración para Python ==========
 find_package(rclpy REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -60,7 +50,6 @@ install(DIRECTORY
 install(TARGETS 
   coco_controller
   body_tracker_node
-  coco_controller_v2
   DESTINATION lib/${PROJECT_NAME}
 )
 
