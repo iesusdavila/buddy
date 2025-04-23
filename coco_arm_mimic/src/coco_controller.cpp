@@ -28,12 +28,12 @@ public:
         joint_limits_["joint_11"] = std::make_pair(-0.7853, 0.7853);
         joint_limits_["joint_12"] = std::make_pair(0.1745, 1.5708);
         
-        std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
-        std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
+        right_joints_ = {"joint_5", "joint_6", "joint_7", "joint_8"};
+        left_joints_ = {"joint_9", "joint_10", "joint_11", "joint_12"};
         
         // Initialize joint positions to midpoints
-        last_right_pos_ = calculateMidpoints(right_joints);
-        last_left_pos_ = calculateMidpoints(left_joints);
+        last_right_pos_ = calculateMidpoints(right_joints_);
+        last_left_pos_ = calculateMidpoints(left_joints_);
         
         torso_tilt_ = 0.0;
         
@@ -142,8 +142,7 @@ private:
             msg->right_elbow_wrist_zy
         };
         
-        std::vector<std::string> right_joints = {"joint_5", "joint_6", "joint_7", "joint_8"};
-        last_right_pos_ = processArmData(right_angles, right_joints, true);
+        last_right_pos_ = processArmData(right_angles, right_joints_, true);
         
         std::array<float, 4> left_angles = {
             msg->left_shoulder_elbow_zy,
@@ -152,8 +151,7 @@ private:
             msg->left_elbow_wrist_zy
         };
         
-        std::vector<std::string> left_joints = {"joint_9", "joint_10", "joint_11", "joint_12"};
-        last_left_pos_ = processArmData(left_angles, left_joints, false);
+        last_left_pos_ = processArmData(left_angles, left_joints_, false);
         
         new_data_available_ = true;
     }
@@ -172,8 +170,7 @@ private:
     void feedback_callback(
         GoalHandleFollowJointTrajectory::SharedPtr,
         const std::shared_ptr<const FollowJointTrajectory::Feedback> feedback) {
-        // Process feedback if needed
-        // RCLCPP_INFO(this->get_logger(), "Received feedback");
+        RCLCPP_INFO(this->get_logger(), "Received feedback");
     }
     
     // Callback function for trajectory result
@@ -256,6 +253,10 @@ private:
     std::map<std::string, float> last_right_pos_;
     std::map<std::string, float> last_left_pos_;
     float torso_tilt_;
+
+    std::vector<std::string> right_joints_;
+    std::vector<std::string> left_joints_;
+
     std::vector<std::string> all_joints_;
     
     // Action client
