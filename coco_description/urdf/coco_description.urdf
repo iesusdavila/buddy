@@ -507,7 +507,7 @@
     <child
       link="link_9" />
     <axis
-      xyz="-1 0 0" />
+      xyz="1 0 0" />
     <limit
       lower="-0.7853"
       upper="1.5708"

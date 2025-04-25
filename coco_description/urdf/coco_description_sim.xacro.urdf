@@ -351,7 +351,7 @@
     <axis
       xyz="0 0 -1" />
     <limit
-      lower="0"
+      lower="0.000"
       upper="1.0472"
       effort="300"
       velocity="3" />
@@ -508,7 +508,7 @@
     <child
       link="link_9" />
     <axis
-      xyz="-1 0 0" />
+      xyz="1 0 0" />
     <limit
       lower="-0.7853"
       upper="1.5708"
@@ -724,7 +724,9 @@
     </joint>
     <joint name="joint_6">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.1</param>
+      </state_interface>
       <state_interface name="velocity"/> 
       <param name="id">6</param>
       <param name="min">0</param>
@@ -758,7 +760,9 @@
     </joint>
     <joint name="joint_10">
       <command_interface name="position"/>
-      <state_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">0.1</param>
+      </state_interface>
       <state_interface name="velocity"/> 
       <param name="id">10</param>
       <param name="min">0</param>
