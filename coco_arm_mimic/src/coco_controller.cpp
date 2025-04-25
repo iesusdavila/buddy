@@ -15,49 +15,42 @@ public:
     using GoalHandleFollowJointTrajectory = rclcpp_action::ClientGoalHandle<FollowJointTrajectory>;
 
     DualArmTrajectoryController() : Node("body_trajectory_controller") {
-        // Define joint limits
         joint_limits_["joint_2"] = std::make_pair(-0.3, 0.3);  
         
-        joint_limits_["joint_5"] = std::make_pair(-0.7853, 1.5708);
-        joint_limits_["joint_6"] = std::make_pair(0.0, 1.0472);
-        joint_limits_["joint_7"] = std::make_pair(-0.7853, 0.7853);
-        joint_limits_["joint_8"] = std::make_pair(0.1745, 1.5708);
+        joint_limits_["joint_5"] = std::make_pair(-0.75, 1.50);
+        joint_limits_["joint_6"] = std::make_pair(0.05, 0.9848);
+        joint_limits_["joint_7"] = std::make_pair(-0.6981, 0.6981);
+        joint_limits_["joint_8"] = std::make_pair(0.15, 1.50);
         
-        joint_limits_["joint_9"] = std::make_pair(-0.7853, 1.5708);
-        joint_limits_["joint_10"] = std::make_pair(0.0, 1.0472);
-        joint_limits_["joint_11"] = std::make_pair(-0.7853, 0.7853);
-        joint_limits_["joint_12"] = std::make_pair(0.1745, 1.5708);
+        joint_limits_["joint_9"] = std::make_pair(-0.75, 1.50);
+        joint_limits_["joint_10"] = std::make_pair(0.05, 0.9848);
+        joint_limits_["joint_11"] = std::make_pair(-0.6981, 0.6981);
+        joint_limits_["joint_12"] = std::make_pair(0.15, 1.50);
         
         right_joints_ = {"joint_5", "joint_6", "joint_7", "joint_8"};
         left_joints_ = {"joint_9", "joint_10", "joint_11", "joint_12"};
         
-        // Initialize joint positions to midpoints
         last_right_pos_ = calculateMidpoints(right_joints_);
         last_left_pos_ = calculateMidpoints(left_joints_);
         
         torso_tilt_ = 0.0;
         
-        // Action client for the joint trajectory controller
         trajectory_client_ = rclcpp_action::create_client<FollowJointTrajectory>(
             this, "/joint_trajectory_controller/follow_joint_trajectory");
             
-        // Wait for the action server to be available
         if (!trajectory_client_->wait_for_action_server(std::chrono::seconds(5))) {
             RCLCPP_ERROR(this->get_logger(), "Action server not available after waiting 5 seconds");
             throw std::runtime_error("Action server not available");
         }
         
-        // Subscribe to body tracking data
         subscription_ = this->create_subscription<coco_interfaces::msg::BodyPosition>(
             "body_tracker", 10, 
             std::bind(&DualArmTrajectoryController::armTrackerCallback, this, std::placeholders::_1));
         
-        // Timer to send trajectory goals
         timer_ = this->create_wall_timer(
-            std::chrono::milliseconds(250), 
+            std::chrono::milliseconds(300), 
             std::bind(&DualArmTrajectoryController::sendTrajectoryGoal, this));
         
-        // Initialize the joint names used in the trajectory
         all_joints_ = {
             "joint_1", "joint_2", "joint_3", "joint_4",
             "joint_5", "joint_6", "joint_7", "joint_8",
@@ -71,8 +64,6 @@ public:
     }
 
 private:
-    const float MAX_CHANGE_PER_STEP = 0.5;
-
     std::map<std::string, float> calculateMidpoints(const std::vector<std::string>& joints) {
         std::map<std::string, float> result;
         for (const auto& j : joints) {
@@ -98,7 +89,7 @@ private:
                                               const std::vector<std::string>& arm_joints, 
                                               const bool is_right) {
         std::map<std::string, float> positions;
-        
+
         positions[arm_joints[0]] = euler2Radian(angles[0]);
         positions[arm_joints[1]] = euler2Radian(angles[1]);
         positions[arm_joints[2]] = euler2Radian(angles[2]); 
@@ -106,19 +97,6 @@ private:
         
         for (const auto& joint : arm_joints) {
             positions[joint] = limitJointPosition(joint, positions[joint]);
-        }
-
-        for (const auto& joint : arm_joints) {
-            float target = positions[joint];
-            float current = is_right ? last_right_pos_[joint] : last_left_pos_[joint];
-            float delta = target - current;
-
-            if (std::abs(delta) > MAX_CHANGE_PER_STEP) {
-                delta = (delta > 0) ? MAX_CHANGE_PER_STEP : -MAX_CHANGE_PER_STEP;
-                target = current + delta;
-            }
-            
-            positions[joint] = target;
         }
         
         return positions;
@@ -156,7 +134,6 @@ private:
         new_data_available_ = true;
     }
     
-    // Callback function for trajectory goal response
     void goal_response_callback(const GoalHandleFollowJointTrajectory::SharedPtr & goal_handle) {
         if (!goal_handle) {
             RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
@@ -166,14 +143,12 @@ private:
         }
     }
     
-    // Callback function for trajectory feedback
     void feedback_callback(
         GoalHandleFollowJointTrajectory::SharedPtr,
         const std::shared_ptr<const FollowJointTrajectory::Feedback> feedback) {
         RCLCPP_INFO(this->get_logger(), "Received feedback");
     }
     
-    // Callback function for trajectory result
     void result_callback(const GoalHandleFollowJointTrajectory::WrappedResult & result) {
         goal_sent_ = false;
         
@@ -182,58 +157,49 @@ private:
                 RCLCPP_INFO(this->get_logger(), "Goal succeeded");
                 break;
             case rclcpp_action::ResultCode::ABORTED:
-                RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
+                RCLCPP_INFO(this->get_logger(), "Goal was aborted");
                 break;
             case rclcpp_action::ResultCode::CANCELED:
-                RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
+                RCLCPP_INFO(this->get_logger(), "Goal was canceled");
                 break;
             default:
-                RCLCPP_ERROR(this->get_logger(), "Unknown result code");
+                RCLCPP_INFO(this->get_logger(), "Unknown result code");
                 break;
         }
     }
     
-    // Method to send trajectory goal
     void sendTrajectoryGoal() {
-        // Only send a new goal if we have new data and no goal is currently being processed
         if (!new_data_available_ || goal_sent_) {
             return;
         }
         
         auto goal_msg = FollowJointTrajectory::Goal();
         
-        // Create the joint trajectory
         goal_msg.trajectory.joint_names = all_joints_;
         
-        // Create a trajectory point
         trajectory_msgs::msg::JointTrajectoryPoint point;
         point.positions = {
             0.0,                   // joint_1
-            torso_tilt_,           // joint_2
+            0.0,           // joint_2
             0.0, 0.0,              // joint_3, joint_4
             last_right_pos_["joint_5"],
             last_right_pos_["joint_6"],
             last_right_pos_["joint_7"],
-            0.87265,               // joint_8
+            last_right_pos_["joint_8"],               // joint_8
             last_left_pos_["joint_9"],
             last_left_pos_["joint_10"],
             last_left_pos_["joint_11"],
-            0.87265                // joint_12
+            last_left_pos_["joint_12"]                // joint_12
         };
         
-        // Set velocities to zero for smoother movement
         point.velocities.resize(point.positions.size(), 0.0);
         
-        // Set trajectory time from start
-        point.time_from_start = rclcpp::Duration::from_seconds(0.5);
+        point.time_from_start = rclcpp::Duration::from_seconds(1.0);
         
-        // Add the point to the trajectory
         goal_msg.trajectory.points.push_back(point);
         
-        // Set goal time tolerance
-        goal_msg.goal_time_tolerance = rclcpp::Duration::from_seconds(0.5);
+        goal_msg.goal_time_tolerance = rclcpp::Duration::from_seconds(1.0);
         
-        // Send the goal
         auto send_goal_options = rclcpp_action::Client<FollowJointTrajectory>::SendGoalOptions();
         send_goal_options.goal_response_callback = 
             std::bind(&DualArmTrajectoryController::goal_response_callback, this, std::placeholders::_1);
@@ -248,7 +214,6 @@ private:
         new_data_available_ = false;
     }
     
-    // Joint limits and positions
     std::map<std::string, std::pair<float, float>> joint_limits_;
     std::map<std::string, float> last_right_pos_;
     std::map<std::string, float> last_left_pos_;
@@ -259,14 +224,11 @@ private:
 
     std::vector<std::string> all_joints_;
     
-    // Action client
     rclcpp_action::Client<FollowJointTrajectory>::SharedPtr trajectory_client_;
     
-    // Subscription and timer
     rclcpp::Subscription<coco_interfaces::msg::BodyPosition>::SharedPtr subscription_;
     rclcpp::TimerBase::SharedPtr timer_;
     
-    // Control flags
     bool new_data_available_;
     bool goal_sent_;
 };

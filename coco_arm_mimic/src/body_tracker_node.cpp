@@ -34,6 +34,13 @@ private:
         return radian2Euler(atan2(-v_x, v_y));
     }
     
+    float calculateAngleWithVerticalZY(float shoulder_z, float shoulder_y, float elbow_z, float elbow_y) {
+        float v_z = elbow_z - shoulder_z;
+        float v_y = elbow_y - shoulder_y;
+        
+        return radian2Euler(atan2(-v_z, v_y));
+    }
+    
     float calculateShoulderTilt(float left_shoulder_x, float left_shoulder_y,
                                float right_shoulder_x, float right_shoulder_y) {
         float dx = right_shoulder_x - left_shoulder_x;
@@ -52,6 +59,20 @@ private:
         
         float det_v_u = u_x * v_y - u_y * v_x;
         float dot_v_u = u_x * v_x + u_y * v_y;
+        
+        return radian2Euler(atan2(det_v_u, dot_v_u));
+    }
+    
+    float calculateRelativeAngleZY(float shoulder_z, float shoulder_y,
+                                 float elbow_z, float elbow_y,
+                                 float wrist_z, float wrist_y) {
+        float v_z = wrist_z - elbow_z;
+        float v_y = wrist_y - elbow_y;
+        float u_z = elbow_z - shoulder_z;
+        float u_y = elbow_y - shoulder_y;
+        
+        float det_v_u = u_z * v_y - u_y * v_z;
+        float dot_v_u = u_z * v_z + u_y * v_y;
         
         return radian2Euler(atan2(det_v_u, dot_v_u));
     }
@@ -97,28 +118,44 @@ private:
             msg->left_wrist_x, msg->left_wrist_y
         );
         
+        float angle_shoulder_right_elbow_ZY = calculateAngleWithVerticalZY(
+            msg->right_shoulder_z, msg->right_shoulder_y,
+            msg->right_elbow_z, msg->right_elbow_y
+        );
+        
+        float angle_elbow_right_wrist_ZY = calculateRelativeAngleZY(
+            msg->right_shoulder_z, msg->right_shoulder_y,
+            msg->right_elbow_z, msg->right_elbow_y,
+            msg->right_wrist_z, msg->right_wrist_y
+        );
+        
+        float angle_shoulder_left_elbow_ZY = calculateAngleWithVerticalZY(
+            msg->left_shoulder_z, msg->left_shoulder_y,
+            msg->left_elbow_z, msg->left_elbow_y
+        );
+        
+        float angle_elbow_left_wrist_ZY = calculateRelativeAngleZY(
+            msg->left_shoulder_z, msg->left_shoulder_y,
+            msg->left_elbow_z, msg->left_elbow_y,
+            msg->left_wrist_z, msg->left_wrist_y
+        );
+        
         arm_msg.shoulder_tilt_angle = shoulder_tilt;
         
-        arm_msg.right_shoulder_elbow_zy = 0.0;  
-        arm_msg.right_elbow_wrist_zy = 0.0;
         arm_msg.right_shoulder_elbow_yx = angle_shoulder_right_elbow_YX;
         arm_msg.right_elbow_wrist_yx = angle_elbow_right_wrist_YX;
-        arm_msg.right_wrist_x = msg->right_wrist_x;
-        arm_msg.right_wrist_y = msg->right_wrist_y;
-        
-        arm_msg.left_shoulder_elbow_zy = 0.0;  
-        arm_msg.left_elbow_wrist_zy = 0.0;
         arm_msg.left_shoulder_elbow_yx = angle_shoulder_left_elbow_YX;
         arm_msg.left_elbow_wrist_yx = angle_elbow_left_wrist_YX;
+        
+        arm_msg.right_shoulder_elbow_zy = angle_shoulder_right_elbow_ZY;
+        arm_msg.right_elbow_wrist_zy = angle_elbow_right_wrist_ZY;
+        arm_msg.left_shoulder_elbow_zy = angle_shoulder_left_elbow_ZY;
+        arm_msg.left_elbow_wrist_zy = angle_elbow_left_wrist_ZY;
+        
+        arm_msg.right_wrist_x = msg->right_wrist_x;
+        arm_msg.right_wrist_y = msg->right_wrist_y;
         arm_msg.left_wrist_x = msg->left_wrist_x;
         arm_msg.left_wrist_y = msg->left_wrist_y;
-
-        if (last_detection_valid) {
-            arm_msg.right_shoulder_elbow_yx = smoothAngle(arm_msg.right_shoulder_elbow_yx, last_valid_arm_msg.right_shoulder_elbow_yx);
-            arm_msg.right_elbow_wrist_yx = smoothAngle(arm_msg.right_elbow_wrist_yx, last_valid_arm_msg.right_elbow_wrist_yx);
-            arm_msg.left_shoulder_elbow_yx = smoothAngle(arm_msg.left_shoulder_elbow_yx, last_valid_arm_msg.left_shoulder_elbow_yx);
-            arm_msg.left_elbow_wrist_yx = smoothAngle(arm_msg.left_elbow_wrist_yx, last_valid_arm_msg.left_elbow_wrist_yx);
-        }
 
         last_valid_arm_msg = arm_msg;
         last_detection_valid = true;
