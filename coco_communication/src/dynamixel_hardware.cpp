@@ -59,7 +59,6 @@ public:
       return CallbackReturn::ERROR;
     }
 
-    // Nombre de cada joint y setup de interfaces
     for (const auto & joint : info.joints)
     {
       joint_names_.push_back(joint.name);
@@ -72,7 +71,6 @@ public:
     portHandler_->openPort();
     portHandler_->setBaudRate(dxl_baud_rate_);
 
-    // Asignar IDs y Limites de motores
     for (size_t i = 0; i < joint_names_.size(); ++i)
     {
       int id = std::stoi(info_.joints[i].parameters["id"]);
@@ -82,7 +80,6 @@ public:
       joint_limits_[joint_names_[i]] = std::make_pair(min, max);
     }
 
-    // Activar el torque y configurar el PID para cada motor
     for (size_t i = 0; i < joint_names_.size(); ++i)
     {
       int id = joint_id_map_[joint_names_[i]];
@@ -157,7 +154,7 @@ public:
   }
 
   return_type write(const rclcpp::Time &, const rclcpp::Duration &) override {
-    dynamixel::GroupSyncWrite sync_write(portHandler_, packetHandler_, 116, 4); // 116 = Goal Position
+    dynamixel::GroupSyncWrite sync_write(portHandler_, packetHandler_, 116, 4); 
 
     for (size_t i = 0; i < joint_names_.size(); ++i) 
     {
