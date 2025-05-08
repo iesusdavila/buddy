@@ -162,7 +162,7 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
-    - Class: Coco_face_display/CocoFaceDisplay
+    - Class: coco_face_display/CocoFaceDisplay
       Enabled: true
       Height: 0.05999999865889549
       Image Topic: /face_screen
