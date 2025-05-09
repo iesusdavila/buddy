@@ -286,51 +286,18 @@ void CocoFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPt
   
   try {
     if (msg->encoding == "yuv422_yuy2") {
-
       cv::Mat yuyv(msg->height, msg->width, CV_8UC2, const_cast<uint8_t*>(msg->data.data()));
       cv::Mat bgr;
       cv::cvtColor(yuyv, bgr, cv::COLOR_YUV2BGR_YUYV); 
       cv_ptr = cv_bridge::CvImageConstPtr(new cv_bridge::CvImage(msg->header, "bgr8", bgr));
-
     } else if (msg->encoding == "bgr8") {
-      
       cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
-
     } else {
-      try {
-        cv_ptr = cv_bridge::toCvShare(msg, "bgra8");
-      } catch (cv_bridge::Exception& e) {
-        cv_ptr = cv_bridge::toCvShare(msg);
-        
-        if (cv_ptr->image.channels() == 1) {
-          cv::cvtColor(cv_ptr->image, bgra, cv::COLOR_GRAY2BGRA);
-        } 
-        else if (cv_ptr->image.channels() == 3) {
-          cv::cvtColor(cv_ptr->image, bgra, cv::COLOR_BGR2BGRA);
-        } 
-        else if (cv_ptr->image.channels() == 4) {
-          if (cv_ptr->encoding == "rgba8") {
-            cv::cvtColor(cv_ptr->image, bgra, cv::COLOR_RGBA2BGRA);
-          } else {
-            bgra = cv_ptr->image;
-          }
-        } 
-        else {
-          RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), 
-            "Unsupported image format with %d channels", cv_ptr->image.channels());
-          return;
-        }
-        
-        cv_ptr = cv_bridge::CvImageConstPtr(new cv_bridge::CvImage(msg->header, "bgra8", bgra));
-      }
+      RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), "Unsupported image format with %d channels", cv_ptr->image.channels());
+      return;
     }
-  } catch (const cv::Exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), 
-      "OpenCV exception: %s", e.what());
-    return;
   } catch (const std::exception& e) {
-    RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), 
-      "Exception during image conversion: %s", e.what());
+    RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), "Exception during image conversion: %s", e.what());
     return;
   }
 
@@ -341,7 +308,6 @@ void CocoFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPt
 
   if (texture_->getWidth() != static_cast<uint32_t>(cv_ptr->image.cols) || 
       texture_->getHeight() != static_cast<uint32_t>(cv_ptr->image.rows)) {
-    
     texture_->unload();
     texture_->setWidth(cv_ptr->image.cols);
     texture_->setHeight(cv_ptr->image.rows);
@@ -361,14 +327,8 @@ void CocoFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPt
     size_t src_pitch = cv_ptr->image.step;
     uint8_t* cv_data = cv_ptr->image.data;
 
-    // for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
-    //   memcpy(dest, cv_data, src_pitch);
-    //   dest += dest_pitch;
-    //   cv_data += src_pitch;
-    // }
     for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
       for (size_t col = 0; col < static_cast<size_t>(cv_ptr->image.cols); col++) {
-        // Accede a los píxeles individualmente y asigna correctamente los canales
         cv::Vec3b bgr = cv_ptr->image.at<cv::Vec3b>(row, col);
         dest[(row * pixelBox.rowPitch + col) * 3 + 0] = bgr[2]; // B
         dest[(row * pixelBox.rowPitch + col) * 3 + 1] = bgr[1]; // G
