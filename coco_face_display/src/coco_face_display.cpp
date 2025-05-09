@@ -122,7 +122,7 @@ void CocoFaceDisplay::createTexture()
       texture_name_,
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
       Ogre::TEX_TYPE_2D,
-      256, 256, 0, Ogre::PF_B8G8R8,  
+      256, 256, 0, Ogre::PF_B8G8R8A8,  
       Ogre::TU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
       
     Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture_->getBuffer();
@@ -292,7 +292,10 @@ void CocoFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPt
       cv_ptr = cv_bridge::CvImageConstPtr(new cv_bridge::CvImage(msg->header, "bgr8", bgr));
     } else if (msg->encoding == "bgr8") {
       cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
-    } else {
+    } else if (msg->encoding == "bgra8") {
+      cv_ptr = cv_bridge::toCvShare(msg, "bgra8");
+    } 
+    else {
       RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), "Unsupported image format with %d channels", cv_ptr->image.channels());
       return;
     }
@@ -336,6 +339,21 @@ void CocoFaceDisplay::updateTexture(const sensor_msgs::msg::Image::ConstSharedPt
       }
     }
   } 
+  else if (format == Ogre::PF_B8G8R8A8) { 
+    size_t dest_pitch = pixelBox.rowPitch * 4;
+    size_t src_pitch = cv_ptr->image.step;
+    uint8_t* cv_data = cv_ptr->image.data;
+
+    for (size_t row = 0; row < static_cast<size_t>(cv_ptr->image.rows); row++) {
+      for (size_t col = 0; col < static_cast<size_t>(cv_ptr->image.cols); col++) {
+        cv::Vec4b bgra = cv_ptr->image.at<cv::Vec4b>(row, col);
+        dest[(row * pixelBox.rowPitch + col) * 4 + 0] = bgra[3]; // B
+        dest[(row * pixelBox.rowPitch + col) * 4 + 1] = bgra[2]; // G
+        dest[(row * pixelBox.rowPitch + col) * 4 + 2] = bgra[1]; // R
+        dest[(row * pixelBox.rowPitch + col) * 4 + 3] = bgra[0]; // A
+      }
+    }
+  }
   else {
     RCLCPP_ERROR(rclcpp::get_logger("coco_face_display"), 
       "Unsupported texture format: %d", static_cast<int>(format));
