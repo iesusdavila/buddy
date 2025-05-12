@@ -21,6 +21,7 @@ ament_target_dependencies(coco_controller
 
 # ========== Instalación común ==========
 install(DIRECTORY
+  launch
   src
   DESTINATION share/${PROJECT_NAME}
 )
