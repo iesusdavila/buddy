@@ -76,12 +76,6 @@ public:
     }
     
     RCLCPP_INFO(this->get_logger(), "PS4 Robot Controller started. Control scheme:");
-    RCLCPP_INFO(this->get_logger(), "- D-pad Up/Down: Rotate hip (joint_1)");
-    RCLCPP_INFO(this->get_logger(), "- D-pad Left/Right: Tilt torso (joint_2)");
-    RCLCPP_INFO(this->get_logger(), "- Square/Circle: Rotate head (joint_3)");
-    RCLCPP_INFO(this->get_logger(), "- Triangle/X: Tilt head (joint_4)");
-    RCLCPP_INFO(this->get_logger(), "- R1 + sticks: Control right arm (joints 5-8)");
-    RCLCPP_INFO(this->get_logger(), "- L1 + sticks: Control left arm (joints 9-12)");
     
     timer_ = this->create_wall_timer(
       100ms, std::bind(&PS4RobotController::send_joint_command, this));
@@ -258,9 +252,6 @@ private:
         break;
       case rclcpp_action::ResultCode::ABORTED:
         RCLCPP_ERROR(this->get_logger(), "Goal was aborted");
-        break;
-      case rclcpp_action::ResultCode::CANCELED:
-        RCLCPP_ERROR(this->get_logger(), "Goal was canceled");
         break;
       default:
         RCLCPP_ERROR(this->get_logger(), "Unknown result code");
