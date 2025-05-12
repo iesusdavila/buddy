@@ -21,7 +21,6 @@ public:
   PS4RobotController()
   : Node("ps4_robot_controller")
   {
-    // Define joint limits
     joint_names_ = {
       "joint_1", "joint_2", "joint_3", "joint_4", 
       "joint_5", "joint_6", "joint_7", "joint_8",
@@ -39,10 +38,27 @@ public:
       1.50, 0.9848, 0.6981, 1.50,
       1.50, 0.9848, 0.6981, 1.50
     };
+
+    current_positions_ = {
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.1,
+      0.0,
+      0.3,
+      0.0,
+      0.1,
+      0.0,
+      0.3
+    };
     
-    current_positions_.resize(joint_names_.size());
     for (size_t i = 0; i < joint_names_.size(); ++i) {
-      current_positions_[i] = (joint_min_limits_[i] + joint_max_limits_[i]) / 2.0;
+      current_positions_[i] = std::min(
+          std::max(current_positions_[i], joint_min_limits_[i]), 
+          joint_max_limits_[i]
+      );
     }
     
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
@@ -129,15 +145,15 @@ private:
       any_control_active = true;
     }
     
-    if (joy_msg->buttons[TRIANGLE]) {
+    if (joy_msg->buttons[CROSS]) {
       current_positions_[3] += button_step;
       any_control_active = true;
-    } else if (joy_msg->buttons[CROSS]) {
+    } else if (joy_msg->buttons[TRIANGLE]) {
       current_positions_[3] -= button_step;
       any_control_active = true;
     }
     
-    if (joy_msg->buttons[R1] && !joy_msg->buttons[L1]) {
+    if (joy_msg->buttons[L1] && !joy_msg->buttons[R1]) {
       any_control_active = true;
       
       if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
@@ -157,7 +173,7 @@ private:
       }
     }
     
-    if (joy_msg->buttons[L1] && !joy_msg->buttons[R1]) {
+    if (joy_msg->buttons[R1] && !joy_msg->buttons[L1]) {
       any_control_active = true;
       
       if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
@@ -165,7 +181,7 @@ private:
       }
       
       if (std::abs(joy_msg->axes[LEFT_STICK_X]) > deadzone) {
-        current_positions_[9] += joy_msg->axes[LEFT_STICK_X] * speed_factor;
+        current_positions_[9] += -joy_msg->axes[LEFT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_X]) > deadzone) {
