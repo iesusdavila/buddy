@@ -186,6 +186,30 @@ private:
         current_positions_[11] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
       }
     }
+
+    if (joy_msg->buttons[R1] && joy_msg->buttons[L1]) {
+      any_control_active = true;
+      
+      if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
+        current_positions_[4] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
+        current_positions_[8] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
+      }
+      
+      if (std::abs(joy_msg->axes[LEFT_STICK_X]) > deadzone) {
+        current_positions_[5] += joy_msg->axes[LEFT_STICK_X] * speed_factor;
+        current_positions_[9] += -joy_msg->axes[LEFT_STICK_X] * speed_factor;
+      }
+      
+      if (std::abs(joy_msg->axes[RIGHT_STICK_X]) > deadzone) {
+        current_positions_[6] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
+        current_positions_[10] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
+      }
+      
+      if (std::abs(joy_msg->axes[RIGHT_STICK_Y]) > deadzone) {
+        current_positions_[7] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
+        current_positions_[11] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
+      }
+    }
     
     for (size_t i = 0; i < current_positions_.size(); ++i) {
       if (current_positions_[i] < joint_min_limits_[i]) {
