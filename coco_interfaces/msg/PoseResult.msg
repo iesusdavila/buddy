@@ -1,3 +1,3 @@
-string challenge 
-string[] detected_poses
+int16 challenge 
+bool detected_poses
 builtin_interfaces/Time timestamp
