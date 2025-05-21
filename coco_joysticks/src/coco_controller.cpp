@@ -78,7 +78,7 @@ public:
     RCLCPP_INFO(this->get_logger(), "PS4 Robot Controller started. Control scheme:");
     
     timer_ = this->create_wall_timer(
-      100ms, std::bind(&PS4RobotController::send_joint_command, this));
+      1500ms, std::bind(&PS4RobotController::send_joint_command, this));
     
     should_send_command_ = false;
     
