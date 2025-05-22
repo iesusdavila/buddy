@@ -3,7 +3,7 @@
 <package format="3">
   <name>coco_joysticks</name>
   <version>0.0.0</version>
-  <description>Paquete para controlar a Coco mediante un joystick de PS4</description>
+  <description>Package to control Coco using a PS4 joystick</description>
   <maintainer email="iesusdavila@gmail.com">Iesus Davila</maintainer>
   <license>Apache-2.0</license>
 
