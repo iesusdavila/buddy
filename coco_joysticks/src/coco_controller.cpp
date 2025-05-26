@@ -78,7 +78,7 @@ public:
     RCLCPP_INFO(this->get_logger(), "PS4 Robot Controller started. Control scheme:");
     
     timer_ = this->create_wall_timer(
-      1500ms, std::bind(&PS4RobotController::send_joint_command, this));
+      100ms, std::bind(&PS4RobotController::send_joint_command, this));
     
     should_send_command_ = false;
     
@@ -117,7 +117,7 @@ private:
   {
     const double button_step = 0.05;
     const double speed_factor = 0.05;
-    const double deadzone = 0.1;
+    const double deadzone = 0.01;
     
     bool any_control_active = false;
     
@@ -147,65 +147,74 @@ private:
       any_control_active = true;
     }
     
-    if (joy_msg->buttons[L1] && !joy_msg->buttons[R1]) {
-      any_control_active = true;
-      
+    if (joy_msg->buttons[L1] && !joy_msg->buttons[R1]) {   
+
       if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[4] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[LEFT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[5] += joy_msg->axes[LEFT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[6] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[7] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
       }
     }
     
     if (joy_msg->buttons[R1] && !joy_msg->buttons[L1]) {
-      any_control_active = true;
       
       if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[8] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[LEFT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[9] += -joy_msg->axes[LEFT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[10] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[11] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
       }
     }
 
     if (joy_msg->buttons[R1] && joy_msg->buttons[L1]) {
-      any_control_active = true;
       
       if (std::abs(joy_msg->axes[LEFT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[4] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
         current_positions_[8] += joy_msg->axes[LEFT_STICK_Y] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[LEFT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[5] += joy_msg->axes[LEFT_STICK_X] * speed_factor;
         current_positions_[9] += -joy_msg->axes[LEFT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_X]) > deadzone) {
+        any_control_active = true;
         current_positions_[6] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
         current_positions_[10] += joy_msg->axes[RIGHT_STICK_X] * speed_factor;
       }
       
       if (std::abs(joy_msg->axes[RIGHT_STICK_Y]) > deadzone) {
+        any_control_active = true;
         current_positions_[7] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
         current_positions_[11] += joy_msg->axes[RIGHT_STICK_Y] * speed_factor;
       }
