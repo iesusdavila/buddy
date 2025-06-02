@@ -84,7 +84,7 @@ public:
 
 private:
   enum PS4Buttons {
-    CROSS = 0, CIRCLE = 1, TRIANGLE = 2, SQUARE = 3,
+    CROSS = 1, CIRCLE = 2, TRIANGLE = 3, SQUARE = 0,
     L1 = 4, R1 = 5, L2_BTN = 6, R2_BTN = 7,
     SHARE = 8, OPTIONS = 9, PS = 10, L3 = 11, R3 = 12
   };
