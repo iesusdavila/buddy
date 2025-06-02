@@ -185,25 +185,21 @@ private:
       double right_y = apply_deadzone(joy_msg->axes[RIGHT_STICK_Y], RIGHT_STICK_Y, 0.01);
       
       if (std::abs(left_y) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "L1 + Left Stick Y: %.3f", left_y);
         any_control_active = true;
         current_positions_[4] += left_y * speed_factor;
       }
       
       if (std::abs(left_x) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "L1 + Left Stick X: %.3f", left_x);
         any_control_active = true;
         current_positions_[5] += left_x * speed_factor;
       }
       
       if (std::abs(right_x) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "L1 + Right Stick X: %.3f", right_x);
         any_control_active = true;
         current_positions_[6] += right_x * speed_factor;
       }
       
       if (std::abs(right_y) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "L1 + Right Stick Y: %.3f", right_y);
         any_control_active = true;
         current_positions_[7] += right_y * speed_factor;
       }
@@ -216,25 +212,21 @@ private:
       double right_y = apply_deadzone(joy_msg->axes[RIGHT_STICK_Y], RIGHT_STICK_Y, deadzone);
       
       if (std::abs(left_y) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "R1 + Left Stick Y: %.3f", left_y);
         any_control_active = true;
-        current_positions_[8] += left_y * speed_factor;
+        current_positions_[8] += -left_y * speed_factor;
       }
       
       if (std::abs(left_x) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "R1 + Left Stick X: %.3f", left_x);
         any_control_active = true;
         current_positions_[9] += -left_x * speed_factor;
       }
       
       if (std::abs(right_x) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "R1 + Right Stick X: %.3f", right_x);
         any_control_active = true;
         current_positions_[10] += right_x * speed_factor;
       }
       
       if (std::abs(right_y) > 0.0) {
-        RCLCPP_INFO(this->get_logger(), "R1 + Right Stick Y: %.3f", right_y);
         any_control_active = true;
         current_positions_[11] += right_y * speed_factor;
       }
@@ -249,7 +241,7 @@ private:
       if (std::abs(left_y) > 0.0) {
         any_control_active = true;
         current_positions_[4] += left_y * speed_factor;
-        current_positions_[8] += left_y * speed_factor;
+        current_positions_[8] += -left_y * speed_factor;
       }
       
       if (std::abs(left_x) > 0.0) {
