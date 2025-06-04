@@ -42,6 +42,7 @@ install(PROGRAMS
 
 # ========== Instalación común ==========
 install(DIRECTORY
+  include
   scripts
   src
   DESTINATION share/${PROJECT_NAME}
@@ -51,6 +52,11 @@ install(TARGETS
   coco_controller
   body_tracker_node
   DESTINATION lib/${PROJECT_NAME}
+)
+
+include_directories(
+  include
+  ${rclcpp_INCLUDE_DIRS}
 )
 
 ament_export_dependencies(
@@ -63,4 +69,5 @@ ament_export_dependencies(
   std_msgs
 )
 
+ament_export_include_directories(include)
 ament_package()
