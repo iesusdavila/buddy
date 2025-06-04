@@ -1,174 +1,162 @@
-#include "rclcpp/rclcpp.hpp"
-#include "coco_interfaces/msg/body_points.hpp"
-#include "coco_interfaces/msg/body_position.hpp"
+#include "body_tracker_node.hpp"
 #include <cmath>
 
-class BodyTrackerNode : public rclcpp::Node {
-public:
-    BodyTrackerNode() : Node("body_tracker_node") {
-        subscription_ = this->create_subscription<coco_interfaces::msg::BodyPoints>(
-            "body_points", 10, 
-            std::bind(&BodyTrackerNode::bodyPointsCallback, this, std::placeholders::_1));
-        
-        publisher_ = this->create_publisher<coco_interfaces::msg::BodyPosition>("body_tracker", 10);
-        
-        RCLCPP_INFO(this->get_logger(), "Body tracker node initialized");
-    }
-
-private:
-    bool last_detection_valid = false;
-    coco_interfaces::msg::BodyPosition last_valid_arm_msg;
-
-    float smoothAngle(float new_angle, float prev_angle, float alpha = 0.2) {
-        return alpha * new_angle + (1 - alpha) * prev_angle;
-    }
-
-    float radian2Euler(float radian) {
-        return radian * 180.0 / M_PI;
-    }
-
-    float calculateAngleWithVertical(float shoulder_x, float shoulder_y, float elbow_x, float elbow_y) {
-        float v_x = elbow_x - shoulder_x;
-        float v_y = elbow_y - shoulder_y;
-        
-        return radian2Euler(atan2(-v_x, v_y));
-    }
+BodyTrackerNode::BodyTrackerNode() : Node("body_tracker_node"), last_detection_valid(false) {
+    subscription_ = this->create_subscription<coco_interfaces::msg::BodyPoints>(
+        "body_points", 10, 
+        std::bind(&BodyTrackerNode::bodyPointsCallback, this, std::placeholders::_1));
     
-    float calculateAngleWithVerticalZY(float shoulder_z, float shoulder_y, float elbow_z, float elbow_y) {
-        float v_z = elbow_z - shoulder_z;
-        float v_y = elbow_y - shoulder_y;
-        
-        return radian2Euler(atan2(-v_z, v_y));
-    }
+    publisher_ = this->create_publisher<coco_interfaces::msg::BodyPosition>("body_tracker", 10);
     
-    float calculateShoulderTilt(float left_shoulder_x, float left_shoulder_y,
-                               float right_shoulder_x, float right_shoulder_y) {
-        float dx = right_shoulder_x - left_shoulder_x;
-        float dy = right_shoulder_y - left_shoulder_y;
-        
-        return radian2Euler(atan2(dy, dx));
-    }
-    
-    float calculateRelativeAngle(float shoulder_x, float shoulder_y,
-                               float elbow_x, float elbow_y,
-                               float wrist_x, float wrist_y) {
-        float v_x = wrist_x - elbow_x;
-        float v_y = wrist_y - elbow_y;
-        float u_x = elbow_x - shoulder_x;
-        float u_y = elbow_y - shoulder_y;
-        
-        float det_v_u = u_x * v_y - u_y * v_x;
-        float dot_v_u = u_x * v_x + u_y * v_y;
-        
-        return radian2Euler(atan2(det_v_u, dot_v_u));
-    }
-    
-    float calculateRelativeAngleZY(float shoulder_z, float shoulder_y,
-                                 float elbow_z, float elbow_y,
-                                 float wrist_z, float wrist_y) {
-        float v_z = wrist_z - elbow_z;
-        float v_y = wrist_y - elbow_y;
-        float u_z = elbow_z - shoulder_z;
-        float u_y = elbow_y - shoulder_y;
-        
-        float det_v_u = u_z * v_y - u_y * v_z;
-        float dot_v_u = u_z * v_z + u_y * v_y;
-        
-        return radian2Euler(atan2(det_v_u, dot_v_u));
-    }
-    
-    void bodyPointsCallback(const coco_interfaces::msg::BodyPoints::SharedPtr msg) {
-        coco_interfaces::msg::BodyPosition arm_msg;
-        arm_msg.is_valid = false;
+    RCLCPP_INFO(this->get_logger(), "Body tracker node initialized");
+}
 
-        if (!msg->is_detected) {
-            if (last_detection_valid) {
-                last_valid_arm_msg.is_valid = false;
-                publisher_->publish(last_valid_arm_msg);
-                RCLCPP_WARN(this->get_logger(), "No detection! Using last valid angles but marking as invalid.");
-            }
-            last_detection_valid = false;
-            return;
+float BodyTrackerNode::smoothAngle(float new_angle, float prev_angle, float alpha) {
+    return alpha * new_angle + (1 - alpha) * prev_angle;
+}
+
+float BodyTrackerNode::radian2Euler(float radian) {
+    return radian * 180.0 / M_PI;
+}
+
+float BodyTrackerNode::calculateAngleWithVertical(float shoulder_x, float shoulder_y, float elbow_x, float elbow_y) {
+    float v_x = elbow_x - shoulder_x;
+    float v_y = elbow_y - shoulder_y;
+    
+    return radian2Euler(atan2(-v_x, v_y));
+}
+
+float BodyTrackerNode::calculateAngleWithVerticalZY(float shoulder_z, float shoulder_y, float elbow_z, float elbow_y) {
+    float v_z = elbow_z - shoulder_z;
+    float v_y = elbow_y - shoulder_y;
+    
+    return radian2Euler(atan2(-v_z, v_y));
+}
+
+float BodyTrackerNode::calculateShoulderTilt(float left_shoulder_x, float left_shoulder_y,
+                           float right_shoulder_x, float right_shoulder_y) {
+    float dx = right_shoulder_x - left_shoulder_x;
+    float dy = right_shoulder_y - left_shoulder_y;
+    
+    return radian2Euler(atan2(dy, dx));
+}
+
+float BodyTrackerNode::calculateRelativeAngle(float shoulder_x, float shoulder_y,
+                           float elbow_x, float elbow_y,
+                           float wrist_x, float wrist_y) {
+    float v_x = wrist_x - elbow_x;
+    float v_y = wrist_y - elbow_y;
+    float u_x = elbow_x - shoulder_x;
+    float u_y = elbow_y - shoulder_y;
+    
+    float det_v_u = u_x * v_y - u_y * v_x;
+    float dot_v_u = u_x * v_x + u_y * v_y;
+    
+    return radian2Euler(atan2(det_v_u, dot_v_u));
+}
+
+float BodyTrackerNode::calculateRelativeAngleZY(float shoulder_z, float shoulder_y,
+                             float elbow_z, float elbow_y,
+                             float wrist_z, float wrist_y) {
+    float v_z = wrist_z - elbow_z;
+    float v_y = wrist_y - elbow_y;
+    float u_z = elbow_z - shoulder_z;
+    float u_y = elbow_y - shoulder_y;
+    
+    float det_v_u = u_z * v_y - u_y * v_z;
+    float dot_v_u = u_z * v_z + u_y * v_y;
+    
+    return radian2Euler(atan2(det_v_u, dot_v_u));
+}
+
+void BodyTrackerNode::bodyPointsCallback(const coco_interfaces::msg::BodyPoints::SharedPtr msg) {
+    coco_interfaces::msg::BodyPosition arm_msg;
+    arm_msg.is_valid = false;
+
+    if (!msg->is_detected) {
+        if (last_detection_valid) {
+            last_valid_arm_msg.is_valid = false;
+            publisher_->publish(last_valid_arm_msg);
+            RCLCPP_WARN(this->get_logger(), "No detection! Using last valid angles but marking as invalid.");
         }
-        
-        float shoulder_tilt = -calculateShoulderTilt(
-            msg->left_shoulder_x, msg->left_shoulder_y,
-            msg->right_shoulder_x, msg->right_shoulder_y
-        );
-        
-        float angle_shoulder_right_elbow_YX = calculateAngleWithVertical(
-            msg->right_shoulder_x, msg->right_shoulder_y,
-            msg->right_elbow_x, msg->right_elbow_y
-        );
-        
-        float angle_elbow_right_wrist_YX = calculateRelativeAngle(
-            msg->right_shoulder_x, msg->right_shoulder_y,
-            msg->right_elbow_x, msg->right_elbow_y,
-            msg->right_wrist_x, msg->right_wrist_y
-        );
-        
-        float angle_shoulder_left_elbow_YX = -calculateAngleWithVertical(
-            msg->left_shoulder_x, msg->left_shoulder_y,
-            msg->left_elbow_x, msg->left_elbow_y
-        );
-        
-        float angle_elbow_left_wrist_YX = calculateRelativeAngle(
-            msg->left_shoulder_x, msg->left_shoulder_y,
-            msg->left_elbow_x, msg->left_elbow_y,
-            msg->left_wrist_x, msg->left_wrist_y
-        );
-        
-        float angle_shoulder_right_elbow_ZY = calculateAngleWithVerticalZY(
-            msg->right_shoulder_z, msg->right_shoulder_y,
-            msg->right_elbow_z, msg->right_elbow_y
-        );
-        
-        float angle_elbow_right_wrist_ZY = calculateRelativeAngleZY(
-            msg->right_shoulder_z, msg->right_shoulder_y,
-            msg->right_elbow_z, msg->right_elbow_y,
-            msg->right_wrist_z, msg->right_wrist_y
-        );
-        
-        float angle_shoulder_left_elbow_ZY = calculateAngleWithVerticalZY(
-            msg->left_shoulder_z, msg->left_shoulder_y,
-            msg->left_elbow_z, msg->left_elbow_y
-        );
-        
-        float angle_elbow_left_wrist_ZY = calculateRelativeAngleZY(
-            msg->left_shoulder_z, msg->left_shoulder_y,
-            msg->left_elbow_z, msg->left_elbow_y,
-            msg->left_wrist_z, msg->left_wrist_y
-        );
-        
-        arm_msg.shoulder_tilt_angle = shoulder_tilt;
-        
-        arm_msg.right_shoulder_elbow_yx = angle_shoulder_right_elbow_YX;
-        arm_msg.right_elbow_wrist_yx = angle_elbow_right_wrist_YX;
-        arm_msg.left_shoulder_elbow_yx = angle_shoulder_left_elbow_YX;
-        arm_msg.left_elbow_wrist_yx = angle_elbow_left_wrist_YX;
-        
-        arm_msg.right_shoulder_elbow_zy = angle_shoulder_right_elbow_ZY;
-        arm_msg.right_elbow_wrist_zy = angle_elbow_right_wrist_ZY;
-        arm_msg.left_shoulder_elbow_zy = angle_shoulder_left_elbow_ZY;
-        arm_msg.left_elbow_wrist_zy = angle_elbow_left_wrist_ZY;
-        
-        arm_msg.right_wrist_x = msg->right_wrist_x;
-        arm_msg.right_wrist_y = msg->right_wrist_y;
-        arm_msg.left_wrist_x = msg->left_wrist_x;
-        arm_msg.left_wrist_y = msg->left_wrist_y;
-
-        last_valid_arm_msg = arm_msg;
-        last_detection_valid = true;
-        arm_msg.is_valid = true;
-        
-        publisher_->publish(arm_msg);
-        
-        RCLCPP_INFO(this->get_logger(), "Sending body position message...");
+        last_detection_valid = false;
+        return;
     }
     
-    rclcpp::Subscription<coco_interfaces::msg::BodyPoints>::SharedPtr subscription_;
-    rclcpp::Publisher<coco_interfaces::msg::BodyPosition>::SharedPtr publisher_;
-};
+    float shoulder_tilt = -calculateShoulderTilt(
+        msg->left_shoulder_x, msg->left_shoulder_y,
+        msg->right_shoulder_x, msg->right_shoulder_y
+    );
+    
+    float angle_shoulder_right_elbow_YX = calculateAngleWithVertical(
+        msg->right_shoulder_x, msg->right_shoulder_y,
+        msg->right_elbow_x, msg->right_elbow_y
+    );
+    
+    float angle_elbow_right_wrist_YX = calculateRelativeAngle(
+        msg->right_shoulder_x, msg->right_shoulder_y,
+        msg->right_elbow_x, msg->right_elbow_y,
+        msg->right_wrist_x, msg->right_wrist_y
+    );
+    
+    float angle_shoulder_left_elbow_YX = -calculateAngleWithVertical(
+        msg->left_shoulder_x, msg->left_shoulder_y,
+        msg->left_elbow_x, msg->left_elbow_y
+    );
+    
+    float angle_elbow_left_wrist_YX = calculateRelativeAngle(
+        msg->left_shoulder_x, msg->left_shoulder_y,
+        msg->left_elbow_x, msg->left_elbow_y,
+        msg->left_wrist_x, msg->left_wrist_y
+    );
+    
+    float angle_shoulder_right_elbow_ZY = calculateAngleWithVerticalZY(
+        msg->right_shoulder_z, msg->right_shoulder_y,
+        msg->right_elbow_z, msg->right_elbow_y
+    );
+    
+    float angle_elbow_right_wrist_ZY = calculateRelativeAngleZY(
+        msg->right_shoulder_z, msg->right_shoulder_y,
+        msg->right_elbow_z, msg->right_elbow_y,
+        msg->right_wrist_z, msg->right_wrist_y
+    );
+    
+    float angle_shoulder_left_elbow_ZY = calculateAngleWithVerticalZY(
+        msg->left_shoulder_z, msg->left_shoulder_y,
+        msg->left_elbow_z, msg->left_elbow_y
+    );
+    
+    float angle_elbow_left_wrist_ZY = calculateRelativeAngleZY(
+        msg->left_shoulder_z, msg->left_shoulder_y,
+        msg->left_elbow_z, msg->left_elbow_y,
+        msg->left_wrist_z, msg->left_wrist_y
+    );
+    
+    arm_msg.shoulder_tilt_angle = shoulder_tilt;
+    
+    arm_msg.right_shoulder_elbow_yx = angle_shoulder_right_elbow_YX;
+    arm_msg.right_elbow_wrist_yx = angle_elbow_right_wrist_YX;
+    arm_msg.left_shoulder_elbow_yx = angle_shoulder_left_elbow_YX;
+    arm_msg.left_elbow_wrist_yx = angle_elbow_left_wrist_YX;
+    
+    arm_msg.right_shoulder_elbow_zy = angle_shoulder_right_elbow_ZY;
+    arm_msg.right_elbow_wrist_zy = angle_elbow_right_wrist_ZY;
+    arm_msg.left_shoulder_elbow_zy = angle_shoulder_left_elbow_ZY;
+    arm_msg.left_elbow_wrist_zy = angle_elbow_left_wrist_ZY;
+    
+    arm_msg.right_wrist_x = msg->right_wrist_x;
+    arm_msg.right_wrist_y = msg->right_wrist_y;
+    arm_msg.left_wrist_x = msg->left_wrist_x;
+    arm_msg.left_wrist_y = msg->left_wrist_y;
+
+    last_valid_arm_msg = arm_msg;
+    last_detection_valid = true;
+    arm_msg.is_valid = true;
+    
+    publisher_->publish(arm_msg);
+    
+    RCLCPP_INFO(this->get_logger(), "Sending body position message...");
+}
 
 int main(int argc, char* argv[]) {
     rclcpp::init(argc, argv);
